@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Containerfile
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://mongo:27017/ecommerce
+      JWT_ACCESS_TOKEN_SECRET: dev-access-token-secret-change-me-123456
+      JWT_REFRESH_TOKEN_SECRET: dev-refresh-token-secret-change-me-123456
+      JWT_ACCESS_TOKEN_EXPIRES_IN_SECONDS: 900
+      JWT_REFRESH_TOKEN_EXPIRES_IN_SECONDS: 604800
+      PASSWORD_HASH_ROUNDS: 12
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: docker.io/library/mongo:8.0
+    environment:
+      MONGO_INITDB_DATABASE: ecommerce
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
