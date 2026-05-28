@@ -24,10 +24,6 @@ app.use(
   }),
 );
 
-app.get("/", (_request, response) => {
-  response.json({ message: "Hello world" });
-});
-
 app.get("/health", (_request, response) => {
   const database = getMongoConnectionStatus();
 

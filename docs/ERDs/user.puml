@@ -1,0 +1,66 @@
+@startuml UserERD
+
+title User Related Mongo Collections
+
+hide circle
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #ffffff
+  BorderColor #222222
+  ArrowColor #222222
+}
+
+entity "users" as users {
+  * id : ObjectId
+  --
+  * email : string
+  * username : string
+  * passwordHash : string
+  imageExt : string
+  phone : string
+  dob : date
+  * jwtVersion : number
+  * createdAt : date
+  * updatedAt : date
+  deletedAt : date
+}
+
+entity "userAddresses" as userAddresses {
+  * id : ObjectId
+  --
+  * userId : ObjectId
+  * countryId : ObjectId
+  * city : string
+  * postalCode : string
+  * createdAt : date
+  * updatedAt : date
+  deletedAt : date
+}
+
+entity "countries" as countries {
+  * id : ObjectId
+  --
+  * iso2 : string
+  * iso3 : string
+  * name : string
+  * createdAt : date
+  * updatedAt : date
+  deletedAt : date
+}
+
+entity "blacklistedTokens" as blacklistedTokens {
+  * id : ObjectId
+  --
+  * userId : ObjectId
+  * accessTokenHash : string
+  * refreshTokenHash : string
+  * createdAt : date
+  * updatedAt : date
+  deletedAt : date
+}
+
+users ||--o{ userAddresses : has
+countries ||--o{ userAddresses : used_by
+users ||--o{ blacklistedTokens : owns
+
+@enduml
