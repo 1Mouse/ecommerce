@@ -7,6 +7,8 @@ import { env } from "./config/env.ts";
 import { container } from "./container.ts";
 import { getMongoConnectionStatus } from "./infrastructure/database/mongodb.ts";
 import { createAuthRouter } from "./modules/auth/auth.routes.ts";
+import { createCountriesRouter } from "./modules/countries/countries.routes.ts";
+import { createUsersRouter } from "./modules/users/users.routes.ts";
 import { errorHandler, notFoundHandler } from "./shared/http/error-handler.ts";
 
 export const app = express();
@@ -33,7 +35,22 @@ app.get("/health", (_request, response) => {
   });
 });
 
-app.use("/api/v1/auth", createAuthRouter(container.authController));
+app.use(
+  "/api/v1/auth",
+  createAuthRouter({
+    authController: container.authController,
+    authMiddleware: container.authMiddleware,
+  }),
+);
+app.use(
+  "/api/v1/users",
+  createUsersRouter({
+    authMiddleware: container.authMiddleware,
+    usersController: container.usersController,
+    userAddressesController: container.userAddressesController,
+  }),
+);
+app.use("/api/v1/countries", createCountriesRouter(container.countriesController));
 
 app.use(notFoundHandler);
 app.use(errorHandler);

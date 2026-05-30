@@ -33,28 +33,39 @@ export class ValidationError extends AppError {
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message = "Unauthorized") {
+  constructor(message = "Unauthorized", code = "UNAUTHORIZED") {
     super(message, {
       statusCode: 401,
-      code: "UNAUTHORIZED",
+      code,
     });
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message = "Conflict") {
+  constructor(message = "Conflict", code = "CONFLICT", details?: unknown) {
     super(message, {
       statusCode: 409,
-      code: "CONFLICT",
+      code,
+      details,
     });
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message = "Resource not found") {
+  constructor(message = "Resource not found", code = "NOT_FOUND") {
     super(message, {
       statusCode: 404,
-      code: "NOT_FOUND",
+      code,
+    });
+  }
+}
+
+export class UnprocessableEntityError extends AppError {
+  constructor(message = "Unprocessable entity", code = "UNPROCESSABLE_ENTITY", details?: unknown) {
+    super(message, {
+      statusCode: 422,
+      code,
+      details,
     });
   }
 }

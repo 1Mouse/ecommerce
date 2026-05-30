@@ -15,10 +15,11 @@ export const errorHandler: ErrorRequestHandler = (
 ) => {
   if (error instanceof AppError) {
     response.status(error.statusCode).json({
-      status: "error",
-      code: error.code,
-      message: error.message,
-      ...(error.details === undefined ? {} : { details: error.details }),
+      error: {
+        code: error.code,
+        message: error.message,
+        ...(error.details === undefined ? {} : { details: error.details }),
+      },
     });
     return;
   }
@@ -26,13 +27,14 @@ export const errorHandler: ErrorRequestHandler = (
   console.error(error);
 
   response.status(500).json({
-    status: "error",
-    code: "INTERNAL_SERVER_ERROR",
-    message:
-      env.nodeEnv === "production"
-        ? "Internal server error"
-        : error instanceof Error
-          ? error.message
-          : "Unknown error",
+    error: {
+      code: "INTERNAL_SERVER_ERROR",
+      message:
+        env.nodeEnv === "production"
+          ? "Internal server error"
+          : error instanceof Error
+            ? error.message
+            : "Unknown error",
+    },
   });
 };

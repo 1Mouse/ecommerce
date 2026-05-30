@@ -1,8 +1,19 @@
 import type { Response } from "express";
 
 export type ApiSuccessResponse<T> = {
-  status: "success";
   data: T;
+};
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export type ApiPaginatedResponse<T> = {
+  data: T[];
+  pagination: PaginationMeta;
 };
 
 export function sendSuccess<T>(
@@ -11,7 +22,18 @@ export function sendSuccess<T>(
   statusCode = 200,
 ): void {
   response.status(statusCode).json({
-    status: "success",
     data,
   } satisfies ApiSuccessResponse<T>);
+}
+
+export function sendPaginated<T>(
+  response: Response,
+  data: T[],
+  pagination: PaginationMeta,
+  statusCode = 200,
+): void {
+  response.status(statusCode).json({
+    data,
+    pagination,
+  } satisfies ApiPaginatedResponse<T>);
 }

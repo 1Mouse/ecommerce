@@ -10,10 +10,6 @@ const envSchema = z.object({
     .string()
     .min(32)
     .default("dev-access-token-secret-change-me-123456"),
-  JWT_REFRESH_TOKEN_SECRET: z
-    .string()
-    .min(32)
-    .default("dev-refresh-token-secret-change-me-123456"),
   JWT_ACCESS_TOKEN_EXPIRES_IN_SECONDS: z.coerce
     .number()
     .int()
@@ -23,7 +19,7 @@ const envSchema = z.object({
     .number()
     .int()
     .positive()
-    .default(7 * 24 * 60 * 60),
+    .default(30 * 24 * 60 * 60),
   PASSWORD_HASH_ROUNDS: z.coerce.number().int().min(10).max(14).default(12),
   CORS_ORIGINS: z
     .string()
@@ -42,10 +38,9 @@ const rawEnv = parsedEnv.data;
 
 if (
   rawEnv.NODE_ENV === "production" &&
-  (rawEnv.JWT_ACCESS_TOKEN_SECRET.includes("change-me") ||
-    rawEnv.JWT_REFRESH_TOKEN_SECRET.includes("change-me"))
+  rawEnv.JWT_ACCESS_TOKEN_SECRET.includes("change-me")
 ) {
-  throw new Error("Production JWT secrets must be configured explicitly");
+  throw new Error("Production JWT access token secret must be configured explicitly");
 }
 
 const corsOrigins =
@@ -60,7 +55,6 @@ export const env = {
   port: rawEnv.PORT,
   mongodbUri: rawEnv.MONGODB_URI,
   jwtAccessTokenSecret: rawEnv.JWT_ACCESS_TOKEN_SECRET,
-  jwtRefreshTokenSecret: rawEnv.JWT_REFRESH_TOKEN_SECRET,
   jwtAccessTokenExpiresInSeconds: rawEnv.JWT_ACCESS_TOKEN_EXPIRES_IN_SECONDS,
   jwtRefreshTokenExpiresInSeconds: rawEnv.JWT_REFRESH_TOKEN_EXPIRES_IN_SECONDS,
   passwordHashRounds: rawEnv.PASSWORD_HASH_ROUNDS,

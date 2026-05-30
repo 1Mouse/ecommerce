@@ -12,8 +12,25 @@ post {
 
 body:json {
   {
-    "name": "{{authName}}",
     "email": "{{authEmail}}",
+    "username": "{{authUsername}}",
     "password": "{{authPassword}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  const data = body?.data;
+  
+  if (data?.user?.id) {
+    bru.setEnvVar("userId", data.user.id);
+  }
+  
+  if (data?.accessToken) {
+    bru.setEnvVar("accessToken", data.accessToken);
+  }
+  
+  if (data?.refreshToken) {
+    bru.setEnvVar("refreshToken", data.refreshToken);
   }
 }

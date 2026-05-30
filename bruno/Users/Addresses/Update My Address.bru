@@ -1,0 +1,25 @@
+meta {
+  name: Update My Address
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/users/me/addresses/{{addressId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "label": "work",
+    "city": "Giza",
+    "postalCode": "12611",
+    "line1": "5 Nile Street",
+    "line2": null
+  }
+}

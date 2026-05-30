@@ -1,0 +1,26 @@
+meta {
+  name: Create My Address
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/users/me/addresses
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "countryId": "{{countryId}}",
+    "label": "home",
+    "city": "Cairo",
+    "postalCode": "11511",
+    "line1": "12 Tahrir Street",
+    "line2": "Apartment 4B"
+  }
+}
