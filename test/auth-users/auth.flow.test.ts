@@ -1,7 +1,10 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { authManifest } from "../../src/modules/auth/auth.manifest.ts";
 import { requestRoute, uniqueUser } from "../helpers/http.ts";
+import { signupAndVerify } from "../helpers/auth.ts";
+import type { AuthSuccessResponse, SignupVerificationResponse } from "../helpers/auth.ts";
+import { clearMailpitMessages, extractVerificationToken, getLatestEmailFor } from "../helpers/mailpit.ts";
 import {
   connectTestDatabase,
   createTestMongoUri,
@@ -10,18 +13,6 @@ import {
 } from "../helpers/test-db.ts";
 import { startTestServer } from "../helpers/test-server.ts";
 import type { TestServer } from "../helpers/test-server.ts";
-
-type AuthSuccessResponse = {
-  data: {
-    user: {
-      id: string;
-      email: string;
-      username: string;
-    };
-    accessToken: string;
-    refreshToken: string;
-  };
-};
 
 type ErrorResponse = {
   error: {
@@ -41,6 +32,7 @@ describe("auth API", () => {
 
   beforeEach(async () => {
     await resetTestDatabase();
+    await clearMailpitMessages();
   });
 
   afterAll(async () => {
@@ -48,29 +40,156 @@ describe("auth API", () => {
     await disconnectTestDatabase();
   });
 
-  it("signs up a user and returns tokens without exposing password data", async () => {
+  it("signs up an unverified user and sends a verification email without returning auth tokens", async () => {
     const user = uniqueUser("signup");
 
-    const response = await requestRoute<AuthSuccessResponse>(
+    const response = await requestRoute<SignupVerificationResponse>(
       server.baseUrl,
       authManifest.signup,
       { body: user },
     );
+    const message = await getLatestEmailFor(user.email);
 
     expect(response.status).toBe(201);
     expect(response.body.data.user).toMatchObject({
       email: user.email,
       username: user.username,
+      emailVerifiedAt: null,
     });
     expect(response.body.data.user.id).toEqual(expect.any(String));
+    expect(response.body.data.message).toBe("Verification email sent");
+    expect(response.body.data).not.toHaveProperty("accessToken");
+    expect(response.body.data).not.toHaveProperty("refreshToken");
+    expect(response.body.data.user).not.toHaveProperty("passwordHash");
+    expect(message.Subject).toBe("Verify your email");
+    expect(extractVerificationToken(message)).toEqual(expect.any(String));
+  });
+
+  it("rejects login before email verification", async () => {
+    const user = uniqueUser("unverified_login");
+    await signup(server.baseUrl, user);
+
+    const response = await requestRoute<ErrorResponse>(
+      server.baseUrl,
+      authManifest.login,
+      {
+        body: {
+          email: user.email,
+          password: user.password,
+        },
+      },
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.body.error.code).toBe("EMAIL_NOT_VERIFIED");
+  });
+
+  it("verifies email with a valid token and returns auth tokens", async () => {
+    const user = uniqueUser("verify_email");
+    await signup(server.baseUrl, user);
+    const message = await getLatestEmailFor(user.email);
+    const token = extractVerificationToken(message);
+
+    const response = await requestRoute<AuthSuccessResponse>(
+      server.baseUrl,
+      authManifest.verifyEmail,
+      { body: { token } },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.user).toMatchObject({
+      email: user.email,
+      username: user.username,
+    });
+    expect(response.body.data.user.emailVerifiedAt).toEqual(expect.any(String));
     expect(response.body.data.accessToken).toEqual(expect.any(String));
     expect(response.body.data.refreshToken).toEqual(expect.any(String));
-    expect(response.body.data.user).not.toHaveProperty("passwordHash");
+  });
+
+  it("rejects reuse of an email verification token", async () => {
+    const user = uniqueUser("verify_reuse");
+    await signup(server.baseUrl, user);
+    const message = await getLatestEmailFor(user.email);
+    const token = extractVerificationToken(message);
+
+    const firstResponse = await requestRoute<AuthSuccessResponse>(
+      server.baseUrl,
+      authManifest.verifyEmail,
+      { body: { token } },
+    );
+    const reusedTokenResponse = await requestRoute<ErrorResponse>(
+      server.baseUrl,
+      authManifest.verifyEmail,
+      { body: { token } },
+    );
+
+    expect(firstResponse.status).toBe(200);
+    expect(reusedTokenResponse.status).toBe(401);
+    expect(reusedTokenResponse.body.error.code).toBe(
+      "INVALID_EMAIL_VERIFICATION_TOKEN",
+    );
+  });
+
+  it("rejects expired email verification tokens", async () => {
+    const user = uniqueUser("verify_expired");
+    await signup(server.baseUrl, user);
+    const message = await getLatestEmailFor(user.email);
+    const token = extractVerificationToken(message);
+    const afterExpiry = new Date(Date.now() + 25 * 60 * 60 * 1_000);
+
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(afterExpiry);
+
+    try {
+      const response = await requestRoute<ErrorResponse>(
+        server.baseUrl,
+        authManifest.verifyEmail,
+        { body: { token } },
+      );
+
+      expect(response.status).toBe(401);
+      expect(response.body.error.code).toBe("INVALID_EMAIL_VERIFICATION_TOKEN");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("resends a verification email with a generic response for unverified users", async () => {
+    const user = uniqueUser("resend");
+    await signup(server.baseUrl, user);
+    await clearMailpitMessages();
+
+    const response = await requestRoute<{ data: { message: string } }>(
+      server.baseUrl,
+      authManifest.resendVerificationEmail,
+      { body: { email: user.email } },
+    );
+    const missingUserResponse = await requestRoute<{ data: { message: string } }>(
+      server.baseUrl,
+      authManifest.resendVerificationEmail,
+      { body: { email: `missing-${user.email}` } },
+    );
+    const message = await getLatestEmailFor(user.email);
+    const token = extractVerificationToken(message);
+    const verifyResponse = await requestRoute<AuthSuccessResponse>(
+      server.baseUrl,
+      authManifest.verifyEmail,
+      { body: { token } },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.message).toBe(
+      "If an unverified account exists, a verification email has been sent",
+    );
+    expect(missingUserResponse.status).toBe(200);
+    expect(missingUserResponse.body).toEqual(response.body);
+    expect(message.Subject).toBe("Verify your email");
+    expect(verifyResponse.status).toBe(200);
   });
 
   it("lets a signed-up user login with valid credentials", async () => {
     const user = uniqueUser("login");
-    await signup(server.baseUrl, user);
+    await signupAndVerify(server.baseUrl, user);
 
     const response = await requestRoute<AuthSuccessResponse>(
       server.baseUrl,
@@ -94,7 +213,7 @@ describe("auth API", () => {
 
   it("rejects login with an invalid password", async () => {
     const user = uniqueUser("bad_login");
-    await signup(server.baseUrl, user);
+    await signupAndVerify(server.baseUrl, user);
 
     const response = await requestRoute<ErrorResponse>(
       server.baseUrl,
@@ -147,8 +266,8 @@ describe("auth API", () => {
 
   it("rotates refresh tokens and rejects reuse of the old refresh token", async () => {
     const user = uniqueUser("refresh");
-    const signupResponse = await signup(server.baseUrl, user);
-    const originalRefreshToken = signupResponse.body.data.refreshToken;
+    const signupResponse = await signupAndVerify(server.baseUrl, user);
+    const originalRefreshToken = signupResponse.data.refreshToken;
 
     const refreshResponse = await requestRoute<AuthSuccessResponse>(
       server.baseUrl,
@@ -172,8 +291,8 @@ describe("auth API", () => {
 
   it("logs out the current refresh token", async () => {
     const user = uniqueUser("logout");
-    const signupResponse = await signup(server.baseUrl, user);
-    const refreshToken = signupResponse.body.data.refreshToken;
+    const signupResponse = await signupAndVerify(server.baseUrl, user);
+    const refreshToken = signupResponse.data.refreshToken;
 
     const logoutResponse = await requestRoute<{ data: { revoked: boolean } }>(
       server.baseUrl,
@@ -195,7 +314,7 @@ describe("auth API", () => {
 
   it("logs out all refresh tokens for the authenticated user", async () => {
     const user = uniqueUser("logout_all");
-    const signupResponse = await signup(server.baseUrl, user);
+    const signupResponse = await signupAndVerify(server.baseUrl, user);
     const loginResponse = await requestRoute<AuthSuccessResponse>(
       server.baseUrl,
       authManifest.login,
@@ -211,14 +330,14 @@ describe("auth API", () => {
       server.baseUrl,
       authManifest.logoutAll,
       {
-        accessToken: signupResponse.body.data.accessToken,
+        accessToken: signupResponse.data.accessToken,
       },
     );
 
     const firstRefreshResponse = await requestRoute<ErrorResponse>(
       server.baseUrl,
       authManifest.refresh,
-      { body: { refreshToken: signupResponse.body.data.refreshToken } },
+      { body: { refreshToken: signupResponse.data.refreshToken } },
     );
     const secondRefreshResponse = await requestRoute<ErrorResponse>(
       server.baseUrl,
@@ -238,8 +357,8 @@ describe("auth API", () => {
 async function signup(
   baseUrl: string,
   user: { email: string; username: string; password: string },
-): Promise<ApiResponse<AuthSuccessResponse>> {
-  return requestRoute<AuthSuccessResponse>(baseUrl, authManifest.signup, {
+): Promise<ApiResponse<SignupVerificationResponse>> {
+  return requestRoute<SignupVerificationResponse>(baseUrl, authManifest.signup, {
     body: user,
   });
 }

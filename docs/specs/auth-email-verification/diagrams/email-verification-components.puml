@@ -1,0 +1,56 @@
+@startuml EmailVerificationComponents
+
+title Email Verification Components
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam component {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  ArrowColor #334155
+}
+
+actor "API Client" as client
+
+package "auth module" as auth {
+  component "auth.manifest.ts" as authManifest
+  component "auth.routes.ts" as authRoutes
+  component "auth.controller.ts" as authController
+  component "auth.service.ts" as authService
+  component "email-verification.service.ts" as emailVerificationService
+  component "email-verification-token.repository.ts" as emailVerificationRepo
+  database "emailVerificationTokens" as emailVerificationTokens
+  component "refresh-token.repository.ts" as refreshTokenRepo
+  database "refreshTokens" as refreshTokens
+}
+
+package "users module" as usersModule {
+  component "user.repository.ts" as userRepo
+  database "users" as users
+}
+
+package "email infrastructure" as emailInfra {
+  interface "EmailService" as emailService
+  component "smtp-email.service.ts" as smtpEmailService
+  queue "Mailpit SMTP\nlocalhost:1025" as mailpitSmtp
+  component "Mailpit UI\nlocalhost:8025" as mailpitUi
+}
+
+client --> authRoutes : HTTP
+authManifest ..> authRoutes : path + schema metadata
+authRoutes --> authController
+authController --> authService
+authService --> userRepo
+authService --> emailVerificationService
+authService --> refreshTokenRepo
+emailVerificationService --> emailVerificationRepo
+emailVerificationService --> emailService
+smtpEmailService ..|> emailService
+smtpEmailService --> mailpitSmtp : SMTP
+mailpitSmtp --> mailpitUi : captured messages
+userRepo --> users
+emailVerificationRepo --> emailVerificationTokens
+refreshTokenRepo --> refreshTokens
+
+@enduml

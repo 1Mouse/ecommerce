@@ -1,19 +1,18 @@
 meta {
-  name: Login
+  name: Verify Email
   type: http
-  seq: 3
+  seq: 2
 }
 
 post {
-  url: {{baseUrl}}{{authLoginPath}}
+  url: {{baseUrl}}{{authVerifyEmailPath}}
   body: json
   auth: none
 }
 
 body:json {
   {
-    "email": "{{authEmail}}",
-    "password": "{{authPassword}}"
+    "token": "{{verificationToken}}"
   }
 }
 

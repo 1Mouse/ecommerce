@@ -26,11 +26,6 @@ script:post-response {
     bru.setEnvVar("userId", data.user.id);
   }
   
-  if (data?.accessToken) {
-    bru.setEnvVar("accessToken", data.accessToken);
-  }
-  
-  if (data?.refreshToken) {
-    bru.setEnvVar("refreshToken", data.refreshToken);
-  }
+  // Signup now sends a verification email. Paste the token from Mailpit into
+  // verificationToken, then run Verify Email to populate auth tokens.
 }

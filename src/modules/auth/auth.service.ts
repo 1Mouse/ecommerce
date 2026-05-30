@@ -1,6 +1,11 @@
-import { ConflictError, UnauthorizedError } from "../../shared/errors/app-error.ts";
-import type { PublicUser, UserRepository } from "../users/user.repository.ts";
+import {
+  ConflictError,
+  ForbiddenError,
+  UnauthorizedError,
+} from "../../shared/errors/app-error.ts";
+import type { PublicUser, User, UserRepository } from "../users/user.repository.ts";
 import { toPublicUser } from "../users/user.repository.ts";
+import type { EmailVerificationService } from "./email-verification.service.ts";
 import type { PasswordService } from "./password.service.ts";
 import type { RefreshToken, RefreshTokenRepository } from "./refresh-token.repository.ts";
 import type { TokenService } from "./token.service.ts";
@@ -10,6 +15,7 @@ export type AuthServiceDependencies = {
   refreshTokens: RefreshTokenRepository;
   passwordService: PasswordService;
   tokenService: TokenService;
+  emailVerificationService: EmailVerificationService;
 };
 
 export type AuthTokenResponse = {
@@ -18,24 +24,38 @@ export type AuthTokenResponse = {
   refreshToken: string;
 };
 
+export type SignupResponse = {
+  user: PublicUser;
+  message: string;
+};
+
+export type ResendVerificationEmailResponse = {
+  message: string;
+};
+
+const resendVerificationEmailMessage =
+  "If an unverified account exists, a verification email has been sent";
+
 export class AuthService {
   private readonly users: UserRepository;
   private readonly refreshTokens: RefreshTokenRepository;
   private readonly passwordService: PasswordService;
   private readonly tokenService: TokenService;
+  private readonly emailVerificationService: EmailVerificationService;
 
   constructor(dependencies: AuthServiceDependencies) {
     this.users = dependencies.users;
     this.refreshTokens = dependencies.refreshTokens;
     this.passwordService = dependencies.passwordService;
     this.tokenService = dependencies.tokenService;
+    this.emailVerificationService = dependencies.emailVerificationService;
   }
 
   async signup(input: {
     email: string;
     username: string;
     password: string;
-  }): Promise<AuthTokenResponse> {
+  }): Promise<SignupResponse> {
     const existingEmail = await this.users.findByEmail(input.email, {
       includeDeleted: true,
     });
@@ -60,17 +80,18 @@ export class AuthService {
       email: input.email,
       username: input.username,
       passwordHash,
+      emailVerifiedAt: null,
       imageExt: null,
       phone: null,
       dob: null,
       deletedAt: null,
     });
 
-    const tokens = await this.createTokenPair(user.id);
+    await this.emailVerificationService.sendVerificationEmail(user);
 
     return {
       user: toPublicUser(user),
-      ...tokens,
+      message: "Verification email sent",
     };
   }
 
@@ -93,11 +114,40 @@ export class AuthService {
       throw new UnauthorizedError("Invalid credentials", "INVALID_CREDENTIALS");
     }
 
-    const tokens = await this.createTokenPair(user.id);
+    if (!user.emailVerifiedAt) {
+      throw new ForbiddenError("Email is not verified", "EMAIL_NOT_VERIFIED");
+    }
+
+    return this.createAuthTokenResponse(user);
+  }
+
+  async verifyEmail(token: string): Promise<AuthTokenResponse> {
+    const storedToken = await this.emailVerificationService.verifyToken(token);
+    const user = await this.users.markEmailVerified(storedToken.userId);
+
+    if (!user) {
+      throw new UnauthorizedError(
+        "Invalid email verification token",
+        "INVALID_EMAIL_VERIFICATION_TOKEN",
+      );
+    }
+
+    await this.emailVerificationService.markTokenUsed(storedToken.id);
+
+    return this.createAuthTokenResponse(user);
+  }
+
+  async resendVerificationEmail(
+    email: string,
+  ): Promise<ResendVerificationEmailResponse> {
+    const user = await this.users.findByEmail(email);
+
+    if (user && !user.emailVerifiedAt) {
+      await this.emailVerificationService.sendVerificationEmail(user);
+    }
 
     return {
-      user: toPublicUser(user),
-      ...tokens,
+      message: resendVerificationEmailMessage,
     };
   }
 
@@ -163,6 +213,15 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
+    };
+  }
+
+  private async createAuthTokenResponse(user: User): Promise<AuthTokenResponse> {
+    const tokens = await this.createTokenPair(user.id);
+
+    return {
+      user: toPublicUser(user),
+      ...tokens,
     };
   }
 

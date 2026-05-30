@@ -27,6 +27,22 @@ export function createAuthRouter(input: CreateAuthRouterInput): Router {
   );
 
   router.post(
+    authManifest.verifyEmail.path,
+    validateBody(authManifest.verifyEmail.bodySchema),
+    asyncHandler((request, response) =>
+      input.authController.verifyEmail(request, response),
+    ),
+  );
+
+  router.post(
+    authManifest.resendVerificationEmail.path,
+    validateBody(authManifest.resendVerificationEmail.bodySchema),
+    asyncHandler((request, response) =>
+      input.authController.resendVerificationEmail(request, response),
+    ),
+  );
+
+  router.post(
     authManifest.refresh.path,
     validateBody(authManifest.refresh.bodySchema),
     asyncHandler((request, response) => input.authController.refresh(request, response)),

@@ -1,0 +1,55 @@
+@startuml SignupSendVerificationSequence
+
+title Signup Sends Email Verification
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+actor Client
+participant "AuthController" as Controller
+participant "AuthService" as AuthService
+participant "UserRepository" as Users
+participant "EmailVerificationService" as VerificationService
+participant "EmailVerificationTokenRepository" as VerificationRepo
+participant "SmtpEmailService" as EmailService
+database "MongoDB" as Mongo
+queue "Mailpit SMTP" as Mailpit
+
+Client -> Controller : POST /api/v1/auth/signup\nemail, username, password
+Controller -> Controller : Zod strip + validate body
+Controller -> AuthService : signup(input)
+AuthService -> Users : findByEmail(email, includeDeleted)
+Users -> Mongo : users.findOne({ email })
+Mongo --> Users : user or null
+AuthService -> Users : findByUsername(username, includeDeleted)
+Users -> Mongo : users.findOne({ username })
+Mongo --> Users : user or null
+
+alt email or username already exists
+  AuthService --> Controller : throw 409 conflict
+  Controller --> Client : error envelope
+else unique account
+  AuthService -> AuthService : hash password
+  AuthService -> Users : create user with emailVerifiedAt = null
+  Users -> Mongo : users.insertOne(...)
+  Mongo --> Users : created user
+  AuthService -> VerificationService : sendVerificationEmail(user)
+  VerificationService -> VerificationService : create random token\nhash token\nbuild verification URL
+  VerificationService -> VerificationRepo : create tokenHash, userId, expiresAt
+  VerificationRepo -> Mongo : emailVerificationTokens.insertOne(...)
+  Mongo --> VerificationRepo : token row
+  VerificationService -> EmailService : send(to, subject, text/html)
+  EmailService -> Mailpit : SMTP message
+  Mailpit --> EmailService : accepted
+  VerificationService --> AuthService : sent
+  AuthService --> Controller : user + message, no auth tokens
+  Controller --> Client : 201 { data }
+end
+
+@enduml

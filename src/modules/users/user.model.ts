@@ -6,6 +6,7 @@ export type UserDocument = {
   email: string;
   username: string;
   passwordHash: string;
+  emailVerifiedAt: Date | null;
   imageExt: string | null;
   phone: string | null;
   dob: Date | null;
@@ -37,6 +38,10 @@ const userSchema = new Schema<UserDocument>(
     passwordHash: {
       type: String,
       required: true,
+    },
+    emailVerifiedAt: {
+      type: Date,
+      default: null,
     },
     imageExt: {
       type: String,

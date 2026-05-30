@@ -1,0 +1,40 @@
+@startuml MailpitDeployment
+
+title Local Podman Deployment With Mailpit
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam node {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+}
+skinparam database {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+}
+
+node "Host Machine" as host {
+  node "Podman Compose" as compose {
+    node "api container\nNode + Express" as api
+    database "mongo container\nMongoDB 8" as mongo
+    node "mailpit container\naxllent/mailpit:v1.30" as mailpit {
+      node "SMTP :1025" as smtp
+      node "Web UI :8025" as ui
+    }
+  }
+
+  node "Browser" as browser
+  node "Bruno" as bruno
+}
+
+bruno --> api : HTTP :3000
+browser --> ui : http://localhost:8025
+api --> mongo : mongodb://mongo:27017/ecommerce
+api --> smtp : SMTP mailpit:1025
+
+note right of mailpit
+  Local-only email catcher.
+  No real emails are sent.
+end note
+
+@enduml

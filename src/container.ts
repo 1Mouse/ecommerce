@@ -1,4 +1,7 @@
+import { SmtpEmailService } from "./infrastructure/email/smtp-email.service.ts";
 import { AuthController } from "./modules/auth/auth.controller.ts";
+import { EmailVerificationService } from "./modules/auth/email-verification.service.ts";
+import { EmailVerificationTokenRepository } from "./modules/auth/email-verification-token.repository.ts";
 import { AuthMiddleware } from "./modules/auth/auth.middleware.ts";
 import { AuthService } from "./modules/auth/auth.service.ts";
 import { PasswordService } from "./modules/auth/password.service.ts";
@@ -18,8 +21,10 @@ const userRepository = new UserRepository();
 const userAddressRepository = new UserAddressRepository();
 const countryRepository = new CountryRepository();
 const refreshTokenRepository = new RefreshTokenRepository();
+const emailVerificationTokenRepository = new EmailVerificationTokenRepository();
 const passwordService = new PasswordService();
 const tokenService = new TokenService();
+const emailService = new SmtpEmailService();
 
 const countriesService = new CountriesService(countryRepository);
 const usersService = new UsersService(userRepository);
@@ -27,12 +32,18 @@ const userAddressesService = new UserAddressesService(
   userAddressRepository,
   countriesService,
 );
+const emailVerificationService = new EmailVerificationService({
+  tokens: emailVerificationTokenRepository,
+  tokenService,
+  emailService,
+});
 
 const authService = new AuthService({
   users: userRepository,
   refreshTokens: refreshTokenRepository,
   passwordService,
   tokenService,
+  emailVerificationService,
 });
 
 const authController = new AuthController(authService);

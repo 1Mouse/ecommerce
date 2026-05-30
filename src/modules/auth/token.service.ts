@@ -46,11 +46,19 @@ export class TokenService {
   }
 
   createRefreshToken(): string {
-    return randomBytes(48).toString("base64url");
+    return this.createOpaqueToken();
   }
 
   hashRefreshToken(refreshToken: string): string {
-    return createHash("sha256").update(refreshToken).digest("hex");
+    return this.hashToken(refreshToken);
+  }
+
+  createOpaqueToken(): string {
+    return randomBytes(48).toString("base64url");
+  }
+
+  hashToken(token: string): string {
+    return createHash("sha256").update(token).digest("hex");
   }
 
   getRefreshTokenExpiresAt(): Date {

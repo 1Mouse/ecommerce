@@ -2,7 +2,14 @@ import type { Request, Response } from "express";
 
 import { UnauthorizedError } from "../../shared/errors/app-error.ts";
 import { sendSuccess } from "../../shared/http/api-response.ts";
-import type { LoginBody, LogoutBody, RefreshBody, SignupBody } from "./auth.schema.ts";
+import type {
+  LoginBody,
+  LogoutBody,
+  RefreshBody,
+  ResendVerificationEmailBody,
+  SignupBody,
+  VerifyEmailBody,
+} from "./auth.schema.ts";
 import type { AuthService } from "./auth.service.ts";
 
 export class AuthController {
@@ -22,6 +29,23 @@ export class AuthController {
   async login(request: Request, response: Response): Promise<void> {
     const body = request.body as LoginBody;
     const result = await this.authService.login(body);
+
+    sendSuccess(response, result);
+  }
+
+  async verifyEmail(request: Request, response: Response): Promise<void> {
+    const body = request.body as VerifyEmailBody;
+    const result = await this.authService.verifyEmail(body.token);
+
+    sendSuccess(response, result);
+  }
+
+  async resendVerificationEmail(
+    request: Request,
+    response: Response,
+  ): Promise<void> {
+    const body = request.body as ResendVerificationEmailBody;
+    const result = await this.authService.resendVerificationEmail(body.email);
 
     sendSuccess(response, result);
   }

@@ -20,6 +20,18 @@ const envSchema = z.object({
     .int()
     .positive()
     .default(30 * 24 * 60 * 60),
+  EMAIL_VERIFICATION_EXPIRES_IN_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(24 * 60 * 60),
+  EMAIL_VERIFICATION_URL: z
+    .string()
+    .url()
+    .default("http://localhost:5173/verify-email"),
+  SMTP_HOST: z.string().min(1).default("localhost"),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65_535).default(1025),
+  SMTP_FROM: z.string().min(1).default("Ecommerce <no-reply@ecommerce.local>"),
   PASSWORD_HASH_ROUNDS: z.coerce.number().int().min(10).max(14).default(12),
   CORS_ORIGINS: z
     .string()
@@ -57,6 +69,11 @@ export const env = {
   jwtAccessTokenSecret: rawEnv.JWT_ACCESS_TOKEN_SECRET,
   jwtAccessTokenExpiresInSeconds: rawEnv.JWT_ACCESS_TOKEN_EXPIRES_IN_SECONDS,
   jwtRefreshTokenExpiresInSeconds: rawEnv.JWT_REFRESH_TOKEN_EXPIRES_IN_SECONDS,
+  emailVerificationExpiresInSeconds: rawEnv.EMAIL_VERIFICATION_EXPIRES_IN_SECONDS,
+  emailVerificationUrl: rawEnv.EMAIL_VERIFICATION_URL,
+  smtpHost: rawEnv.SMTP_HOST,
+  smtpPort: rawEnv.SMTP_PORT,
+  smtpFrom: rawEnv.SMTP_FROM,
   passwordHashRounds: rawEnv.PASSWORD_HASH_ROUNDS,
   corsOrigins,
 } as const;

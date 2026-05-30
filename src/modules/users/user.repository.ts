@@ -9,6 +9,7 @@ export type User = {
   email: string;
   username: string;
   passwordHash: string;
+  emailVerifiedAt: Date | null;
   imageExt: string | null;
   phone: string | null;
   dob: Date | null;
@@ -46,6 +47,7 @@ export class UserRepository extends MongoBaseCrudRepository<UserDocument, User> 
       email: document.email,
       username: document.username,
       passwordHash: document.passwordHash,
+      emailVerifiedAt: document.emailVerifiedAt,
       imageExt: document.imageExt,
       phone: document.phone,
       dob: document.dob,
@@ -76,6 +78,12 @@ export class UserRepository extends MongoBaseCrudRepository<UserDocument, User> 
     }).exec();
     return document ? this.toEntity(document) : null;
   }
+
+  async markEmailVerified(userId: string, verifiedAt = new Date()): Promise<User | null> {
+    return this.updateById(userId, {
+      emailVerifiedAt: verifiedAt,
+    });
+  }
 }
 
 export function toPublicUser(user: User): PublicUser {
@@ -83,6 +91,7 @@ export function toPublicUser(user: User): PublicUser {
     id: user.id,
     email: user.email,
     username: user.username,
+    emailVerifiedAt: user.emailVerifiedAt,
     imageExt: user.imageExt,
     phone: user.phone,
     dob: user.dob,

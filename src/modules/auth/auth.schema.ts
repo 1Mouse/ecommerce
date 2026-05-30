@@ -33,7 +33,23 @@ export const refreshBodySchema = z
 
 export const logoutBodySchema = refreshBodySchema;
 
+export const resendVerificationEmailBodySchema = z
+  .object({
+    email: emailSchema,
+  })
+  .strip();
+
+export const verifyEmailBodySchema = z
+  .object({
+    token: z.string().min(32).max(500),
+  })
+  .strip();
+
 export type SignupBody = z.infer<typeof signupBodySchema>;
 export type LoginBody = z.infer<typeof loginBodySchema>;
 export type RefreshBody = z.infer<typeof refreshBodySchema>;
 export type LogoutBody = z.infer<typeof logoutBodySchema>;
+export type ResendVerificationEmailBody = z.infer<
+  typeof resendVerificationEmailBodySchema
+>;
+export type VerifyEmailBody = z.infer<typeof verifyEmailBodySchema>;

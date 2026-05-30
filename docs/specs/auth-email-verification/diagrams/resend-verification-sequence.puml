@@ -1,0 +1,41 @@
+@startuml ResendVerificationSequence
+
+title Resend Verification Email
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+actor Client
+participant "AuthController" as Controller
+participant "AuthService" as AuthService
+participant "UserRepository" as Users
+participant "EmailVerificationService" as VerificationService
+participant "SmtpEmailService" as EmailService
+database "MongoDB" as Mongo
+queue "Mailpit SMTP" as Mailpit
+
+Client -> Controller : POST /api/v1/auth/resend-verification-email\nemail
+Controller -> Controller : Zod strip + validate body
+Controller -> AuthService : resendVerificationEmail(email)
+AuthService -> Users : findByEmail(email)
+Users -> Mongo : users.findOne({ email, deletedAt: null })
+Mongo --> Users : user or null
+
+alt user exists and is unverified
+  AuthService -> VerificationService : sendVerificationEmail(user)
+  VerificationService -> EmailService : send verification email
+  EmailService -> Mailpit : SMTP message
+else user missing or already verified
+  AuthService -> AuthService : do not reveal account state
+end
+
+AuthService --> Controller : generic success message
+Controller --> Client : 200 { data: { message } }
+
+@enduml

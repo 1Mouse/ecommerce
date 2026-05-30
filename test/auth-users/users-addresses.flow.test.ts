@@ -1,9 +1,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { authManifest } from "../../src/modules/auth/auth.manifest.ts";
 import { countriesManifest } from "../../src/modules/countries/countries.manifest.ts";
 import { usersManifest } from "../../src/modules/users/users.manifest.ts";
 import { requestRoute, uniqueUser } from "../helpers/http.ts";
+import { signupAndVerify } from "../helpers/auth.ts";
+import type { AuthSuccessResponse } from "../helpers/auth.ts";
+import { clearMailpitMessages } from "../helpers/mailpit.ts";
 import {
   connectTestDatabase,
   createTestMongoUri,
@@ -13,18 +15,6 @@ import {
 } from "../helpers/test-db.ts";
 import { startTestServer } from "../helpers/test-server.ts";
 import type { TestServer } from "../helpers/test-server.ts";
-
-type AuthSuccessResponse = {
-  data: {
-    user: {
-      id: string;
-      email: string;
-      username: string;
-    };
-    accessToken: string;
-    refreshToken: string;
-  };
-};
 
 type UserResponse = {
   data: {
@@ -87,6 +77,7 @@ describe("users and addresses API", () => {
 
   beforeEach(async () => {
     await resetTestDatabase();
+    await clearMailpitMessages();
     await seedTestCountries();
   });
 
@@ -337,9 +328,10 @@ async function signup(
   baseUrl: string,
   user: { email: string; username: string; password: string },
 ): Promise<ApiResponse<AuthSuccessResponse>> {
-  return requestRoute<AuthSuccessResponse>(baseUrl, authManifest.signup, {
-    body: user,
-  });
+  return {
+    status: 200,
+    body: await signupAndVerify(baseUrl, user),
+  };
 }
 
 async function getFirstCountryId(baseUrl: string): Promise<string> {

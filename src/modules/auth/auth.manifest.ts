@@ -3,7 +3,9 @@ import {
   loginBodySchema,
   logoutBodySchema,
   refreshBodySchema,
+  resendVerificationEmailBodySchema,
   signupBodySchema,
+  verifyEmailBodySchema,
 } from "./auth.schema.ts";
 
 export const authManifest = {
@@ -24,6 +26,24 @@ export const authManifest = {
     path: "/api/v1/auth/login",
     auth: "public",
     bodySchema: loginBodySchema,
+  }),
+  verifyEmail: defineRoute({
+    name: "auth.verifyEmail",
+    brunoVar: "authVerifyEmailPath",
+    version: "v1",
+    method: "post",
+    path: "/api/v1/auth/verify-email",
+    auth: "public",
+    bodySchema: verifyEmailBodySchema,
+  }),
+  resendVerificationEmail: defineRoute({
+    name: "auth.resendVerificationEmail",
+    brunoVar: "authResendVerificationEmailPath",
+    version: "v1",
+    method: "post",
+    path: "/api/v1/auth/resend-verification-email",
+    auth: "public",
+    bodySchema: resendVerificationEmailBodySchema,
   }),
   refresh: defineRoute({
     name: "auth.refresh",

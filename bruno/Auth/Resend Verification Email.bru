@@ -1,0 +1,17 @@
+meta {
+  name: Resend Verification Email
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}{{authResendVerificationEmailPath}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{authEmail}}"
+  }
+}

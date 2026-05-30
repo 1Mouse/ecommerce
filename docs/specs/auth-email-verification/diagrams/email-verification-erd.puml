@@ -1,6 +1,6 @@
-@startuml UserERD
+@startuml EmailVerificationERD
 
-title User Related Mongo Collections
+title Email Verification Mongo Collections
 
 hide circle
 skinparam linetype ortho
@@ -25,27 +25,13 @@ entity "users" as users {
   deletedAt : date
 }
 
-entity "userAddresses" as userAddresses {
+entity "emailVerificationTokens" as emailVerificationTokens {
   * _id : ObjectId
   --
   * userId : ObjectId <<index>>
-  * countryId : ObjectId
-  label : string
-  * city : string
-  * postalCode : string
-  * line1 : string
-  line2 : string
-  * createdAt : date
-  * updatedAt : date
-  deletedAt : date
-}
-
-entity "countries" as countries {
-  * _id : ObjectId
-  --
-  * iso2 : string <<unique>>
-  * iso3 : string <<unique>>
-  * name : string <<unique>>
+  * tokenHash : string <<unique>>
+  * expiresAt : date <<ttl>>
+  usedAt : date
   * createdAt : date
   * updatedAt : date
   deletedAt : date
@@ -64,21 +50,7 @@ entity "refreshTokens" as refreshTokens {
   deletedAt : date
 }
 
-entity "emailVerificationTokens" as emailVerificationTokens {
-  * _id : ObjectId
-  --
-  * userId : ObjectId <<index>>
-  * tokenHash : string <<unique>>
-  * expiresAt : date <<ttl>>
-  usedAt : date
-  * createdAt : date
-  * updatedAt : date
-  deletedAt : date
-}
-
-users ||--o{ userAddresses : has
-countries ||--o{ userAddresses : used_by
-users ||--o{ refreshTokens : owns
 users ||--o{ emailVerificationTokens : owns
+users ||--o{ refreshTokens : owns_after_verification
 
 @enduml
