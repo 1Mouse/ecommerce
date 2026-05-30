@@ -1,23 +1,22 @@
 import { Router } from "express";
 
 import { asyncHandler } from "../../shared/http/async-handler.ts";
-import { paginationQuerySchema } from "../../shared/http/pagination.ts";
 import { validateParams, validateQuery } from "../../shared/http/validation.ts";
 import type { CountriesController } from "./countries.controller.ts";
-import { countryIdParamsSchema } from "./countries.schema.ts";
+import { countriesManifest } from "./countries.manifest.ts";
 
 export function createCountriesRouter(controller: CountriesController): Router {
   const router = Router();
 
   router.get(
-    "/",
-    validateQuery(paginationQuerySchema),
+    countriesManifest.listCountries.path,
+    validateQuery(countriesManifest.listCountries.querySchema),
     asyncHandler((request, response) => controller.listCountries(request, response)),
   );
 
   router.get(
-    "/:countryId",
-    validateParams(countryIdParamsSchema),
+    countriesManifest.getCountryById.path,
+    validateParams(countriesManifest.getCountryById.paramsSchema),
     asyncHandler((request, response) => controller.getCountryById(request, response)),
   );
 

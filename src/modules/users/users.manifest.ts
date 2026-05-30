@@ -1,0 +1,82 @@
+import { paginationQuerySchema } from "../../shared/http/pagination.ts";
+import { defineRoute } from "../../shared/http/define-route.ts";
+import {
+  addressIdParamsSchema,
+  createAddressBodySchema,
+  updateAddressBodySchema,
+} from "./user-addresses.schema.ts";
+import { updateMeBodySchema } from "./users.schema.ts";
+
+export const usersManifest = {
+  getMe: defineRoute({
+    name: "users.getMe",
+    brunoVar: "usersGetMePath",
+    version: "v1",
+    method: "get",
+    path: "/api/v1/users/me",
+    auth: "required",
+  }),
+  updateMe: defineRoute({
+    name: "users.updateMe",
+    brunoVar: "usersUpdateMePath",
+    version: "v1",
+    method: "patch",
+    path: "/api/v1/users/me",
+    auth: "required",
+    bodySchema: updateMeBodySchema,
+  }),
+  deleteMe: defineRoute({
+    name: "users.deleteMe",
+    brunoVar: "usersDeleteMePath",
+    version: "v1",
+    method: "delete",
+    path: "/api/v1/users/me",
+    auth: "required",
+  }),
+  listMyAddresses: defineRoute({
+    name: "users.addresses.listMyAddresses",
+    brunoVar: "userAddressesListMyPath",
+    version: "v1",
+    method: "get",
+    path: "/api/v1/users/me/addresses",
+    auth: "required",
+    querySchema: paginationQuerySchema,
+  }),
+  createMyAddress: defineRoute({
+    name: "users.addresses.createMyAddress",
+    brunoVar: "userAddressesCreateMyPath",
+    version: "v1",
+    method: "post",
+    path: "/api/v1/users/me/addresses",
+    auth: "required",
+    bodySchema: createAddressBodySchema,
+  }),
+  getMyAddress: defineRoute({
+    name: "users.addresses.getMyAddress",
+    brunoVar: "userAddressesGetMyPath",
+    version: "v1",
+    method: "get",
+    path: "/api/v1/users/me/addresses/:addressId",
+    auth: "required",
+    paramsSchema: addressIdParamsSchema,
+  }),
+  updateMyAddress: defineRoute({
+    name: "users.addresses.updateMyAddress",
+    brunoVar: "userAddressesUpdateMyPath",
+    version: "v1",
+    method: "patch",
+    path: "/api/v1/users/me/addresses/:addressId",
+    auth: "required",
+    paramsSchema: addressIdParamsSchema,
+    bodySchema: updateAddressBodySchema,
+  }),
+  deleteMyAddress: defineRoute({
+    name: "users.addresses.deleteMyAddress",
+    brunoVar: "userAddressesDeleteMyPath",
+    version: "v1",
+    method: "delete",
+    path: "/api/v1/users/me/addresses/:addressId",
+    auth: "required",
+    paramsSchema: addressIdParamsSchema,
+  }),
+} as const;

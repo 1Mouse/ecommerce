@@ -1,13 +1,11 @@
 import { Router } from "express";
 
 import { asyncHandler } from "../../shared/http/async-handler.ts";
-import { paginationQuerySchema } from "../../shared/http/pagination.ts";
 import { validateBody, validateParams, validateQuery } from "../../shared/http/validation.ts";
 import type { AuthMiddleware } from "../auth/auth.middleware.ts";
 import type { UserAddressesController } from "./user-addresses.controller.ts";
-import { addressIdParamsSchema, createAddressBodySchema, updateAddressBodySchema } from "./user-addresses.schema.ts";
 import type { UsersController } from "./users.controller.ts";
-import { updateMeBodySchema } from "./users.schema.ts";
+import { usersManifest } from "./users.manifest.ts";
 
 export type CreateUsersRouterInput = {
   authMiddleware: AuthMiddleware;
@@ -20,65 +18,65 @@ export function createUsersRouter(input: CreateUsersRouterInput): Router {
   const requireAuth = input.authMiddleware.requireAuth;
 
   router.get(
-    "/me",
+    usersManifest.getMe.path,
     requireAuth,
     asyncHandler((request, response) => input.usersController.getMe(request, response)),
   );
 
   router.patch(
-    "/me",
+    usersManifest.updateMe.path,
     requireAuth,
-    validateBody(updateMeBodySchema),
+    validateBody(usersManifest.updateMe.bodySchema),
     asyncHandler((request, response) => input.usersController.updateMe(request, response)),
   );
 
   router.delete(
-    "/me",
+    usersManifest.deleteMe.path,
     requireAuth,
     asyncHandler((request, response) => input.usersController.deleteMe(request, response)),
   );
 
   router.get(
-    "/me/addresses",
+    usersManifest.listMyAddresses.path,
     requireAuth,
-    validateQuery(paginationQuerySchema),
+    validateQuery(usersManifest.listMyAddresses.querySchema),
     asyncHandler((request, response) =>
       input.userAddressesController.listMyAddresses(request, response),
     ),
   );
 
   router.post(
-    "/me/addresses",
+    usersManifest.createMyAddress.path,
     requireAuth,
-    validateBody(createAddressBodySchema),
+    validateBody(usersManifest.createMyAddress.bodySchema),
     asyncHandler((request, response) =>
       input.userAddressesController.createMyAddress(request, response),
     ),
   );
 
   router.get(
-    "/me/addresses/:addressId",
+    usersManifest.getMyAddress.path,
     requireAuth,
-    validateParams(addressIdParamsSchema),
+    validateParams(usersManifest.getMyAddress.paramsSchema),
     asyncHandler((request, response) =>
       input.userAddressesController.getMyAddress(request, response),
     ),
   );
 
   router.patch(
-    "/me/addresses/:addressId",
+    usersManifest.updateMyAddress.path,
     requireAuth,
-    validateParams(addressIdParamsSchema),
-    validateBody(updateAddressBodySchema),
+    validateParams(usersManifest.updateMyAddress.paramsSchema),
+    validateBody(usersManifest.updateMyAddress.bodySchema),
     asyncHandler((request, response) =>
       input.userAddressesController.updateMyAddress(request, response),
     ),
   );
 
   router.delete(
-    "/me/addresses/:addressId",
+    usersManifest.deleteMyAddress.path,
     requireAuth,
-    validateParams(addressIdParamsSchema),
+    validateParams(usersManifest.deleteMyAddress.paramsSchema),
     asyncHandler((request, response) =>
       input.userAddressesController.deleteMyAddress(request, response),
     ),

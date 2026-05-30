@@ -36,21 +36,19 @@ app.get("/health", (_request, response) => {
 });
 
 app.use(
-  "/api/v1/auth",
   createAuthRouter({
     authController: container.authController,
     authMiddleware: container.authMiddleware,
   }),
 );
 app.use(
-  "/api/v1/users",
   createUsersRouter({
     authMiddleware: container.authMiddleware,
     usersController: container.usersController,
     userAddressesController: container.userAddressesController,
   }),
 );
-app.use("/api/v1/countries", createCountriesRouter(container.countriesController));
+app.use(createCountriesRouter(container.countriesController));
 
 app.use(notFoundHandler);
 app.use(errorHandler);

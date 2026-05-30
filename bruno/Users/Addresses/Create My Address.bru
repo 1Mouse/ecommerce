@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/v1/users/me/addresses
+  url: {{baseUrl}}{{userAddressesCreateMyPath}}
   body: json
   auth: bearer
 }
@@ -22,5 +22,14 @@ body:json {
     "postalCode": "11511",
     "line1": "12 Tahrir Street",
     "line2": "Apartment 4B"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  const address = body?.data;
+  
+  if (address?.id) {
+    bru.setEnvVar("addressId", address.id);
   }
 }

@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { requestJson, uniqueUser } from "../helpers/http.ts";
+import { authManifest } from "../../src/modules/auth/auth.manifest.ts";
+import { requestRoute, uniqueUser } from "../helpers/http.ts";
 import {
   connectTestDatabase,
   createTestMongoUri,
@@ -50,10 +51,9 @@ describe("auth API", () => {
   it("signs up a user and returns tokens without exposing password data", async () => {
     const user = uniqueUser("signup");
 
-    const response = await requestJson<AuthSuccessResponse>(
+    const response = await requestRoute<AuthSuccessResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/signup",
+      authManifest.signup,
       { body: user },
     );
 
@@ -72,10 +72,9 @@ describe("auth API", () => {
     const user = uniqueUser("login");
     await signup(server.baseUrl, user);
 
-    const response = await requestJson<AuthSuccessResponse>(
+    const response = await requestRoute<AuthSuccessResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/login",
+      authManifest.login,
       {
         body: {
           email: user.email,
@@ -97,10 +96,9 @@ describe("auth API", () => {
     const user = uniqueUser("bad_login");
     await signup(server.baseUrl, user);
 
-    const response = await requestJson<ErrorResponse>(
+    const response = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/login",
+      authManifest.login,
       {
         body: {
           email: user.email,
@@ -117,10 +115,9 @@ describe("auth API", () => {
     const user = uniqueUser("duplicate");
     await signup(server.baseUrl, user);
 
-    const duplicateEmail = await requestJson<ErrorResponse>(
+    const duplicateEmail = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/signup",
+      authManifest.signup,
       {
         body: {
           email: user.email,
@@ -130,10 +127,9 @@ describe("auth API", () => {
       },
     );
 
-    const duplicateUsername = await requestJson<ErrorResponse>(
+    const duplicateUsername = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/signup",
+      authManifest.signup,
       {
         body: {
           email: `other-${user.email}`,
@@ -154,10 +150,9 @@ describe("auth API", () => {
     const signupResponse = await signup(server.baseUrl, user);
     const originalRefreshToken = signupResponse.body.data.refreshToken;
 
-    const refreshResponse = await requestJson<AuthSuccessResponse>(
+    const refreshResponse = await requestRoute<AuthSuccessResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/refresh",
+      authManifest.refresh,
       { body: { refreshToken: originalRefreshToken } },
     );
 
@@ -165,10 +160,9 @@ describe("auth API", () => {
     expect(refreshResponse.body.data.refreshToken).not.toBe(originalRefreshToken);
     expect(refreshResponse.body.data.accessToken).toEqual(expect.any(String));
 
-    const reusedTokenResponse = await requestJson<ErrorResponse>(
+    const reusedTokenResponse = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/refresh",
+      authManifest.refresh,
       { body: { refreshToken: originalRefreshToken } },
     );
 
@@ -181,17 +175,15 @@ describe("auth API", () => {
     const signupResponse = await signup(server.baseUrl, user);
     const refreshToken = signupResponse.body.data.refreshToken;
 
-    const logoutResponse = await requestJson<{ data: { revoked: boolean } }>(
+    const logoutResponse = await requestRoute<{ data: { revoked: boolean } }>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/logout",
+      authManifest.logout,
       { body: { refreshToken } },
     );
 
-    const refreshResponse = await requestJson<ErrorResponse>(
+    const refreshResponse = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/refresh",
+      authManifest.refresh,
       { body: { refreshToken } },
     );
 
@@ -204,10 +196,9 @@ describe("auth API", () => {
   it("logs out all refresh tokens for the authenticated user", async () => {
     const user = uniqueUser("logout_all");
     const signupResponse = await signup(server.baseUrl, user);
-    const loginResponse = await requestJson<AuthSuccessResponse>(
+    const loginResponse = await requestRoute<AuthSuccessResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/login",
+      authManifest.login,
       {
         body: {
           email: user.email,
@@ -216,25 +207,22 @@ describe("auth API", () => {
       },
     );
 
-    const logoutAllResponse = await requestJson<{ data: { revokedCount: number } }>(
+    const logoutAllResponse = await requestRoute<{ data: { revokedCount: number } }>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/logout-all",
+      authManifest.logoutAll,
       {
         accessToken: signupResponse.body.data.accessToken,
       },
     );
 
-    const firstRefreshResponse = await requestJson<ErrorResponse>(
+    const firstRefreshResponse = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/refresh",
+      authManifest.refresh,
       { body: { refreshToken: signupResponse.body.data.refreshToken } },
     );
-    const secondRefreshResponse = await requestJson<ErrorResponse>(
+    const secondRefreshResponse = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/auth/refresh",
+      authManifest.refresh,
       { body: { refreshToken: loginResponse.body.data.refreshToken } },
     );
 
@@ -251,7 +239,7 @@ async function signup(
   baseUrl: string,
   user: { email: string; username: string; password: string },
 ): Promise<ApiResponse<AuthSuccessResponse>> {
-  return requestJson<AuthSuccessResponse>(baseUrl, "POST", "/api/v1/auth/signup", {
+  return requestRoute<AuthSuccessResponse>(baseUrl, authManifest.signup, {
     body: user,
   });
 }

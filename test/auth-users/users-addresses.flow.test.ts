@@ -1,6 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { requestJson, uniqueUser } from "../helpers/http.ts";
+import { authManifest } from "../../src/modules/auth/auth.manifest.ts";
+import { countriesManifest } from "../../src/modules/countries/countries.manifest.ts";
+import { usersManifest } from "../../src/modules/users/users.manifest.ts";
+import { requestRoute, uniqueUser } from "../helpers/http.ts";
 import {
   connectTestDatabase,
   createTestMongoUri,
@@ -97,16 +100,14 @@ describe("users and addresses API", () => {
     const signupResponse = await signup(server.baseUrl, user);
     const accessToken = signupResponse.body.data.accessToken;
 
-    const getBeforeUpdate = await requestJson<UserResponse>(
+    const getBeforeUpdate = await requestRoute<UserResponse>(
       server.baseUrl,
-      "GET",
-      "/api/v1/users/me",
+      usersManifest.getMe,
       { accessToken },
     );
-    const update = await requestJson<UserResponse>(
+    const update = await requestRoute<UserResponse>(
       server.baseUrl,
-      "PATCH",
-      "/api/v1/users/me",
+      usersManifest.updateMe,
       {
         accessToken,
         body: {
@@ -117,10 +118,9 @@ describe("users and addresses API", () => {
         },
       },
     );
-    const getAfterUpdate = await requestJson<UserResponse>(
+    const getAfterUpdate = await requestRoute<UserResponse>(
       server.baseUrl,
-      "GET",
-      "/api/v1/users/me",
+      usersManifest.getMe,
       { accessToken },
     );
 
@@ -138,10 +138,9 @@ describe("users and addresses API", () => {
     const signupResponse = await signup(server.baseUrl, user);
     const accessToken = signupResponse.body.data.accessToken;
 
-    const invalidPhone = await requestJson<ErrorResponse>(
+    const invalidPhone = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "PATCH",
-      "/api/v1/users/me",
+      usersManifest.updateMe,
       {
         accessToken,
         body: {
@@ -149,10 +148,9 @@ describe("users and addresses API", () => {
         },
       },
     );
-    const futureDob = await requestJson<ErrorResponse>(
+    const futureDob = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "PATCH",
-      "/api/v1/users/me",
+      usersManifest.updateMe,
       {
         accessToken,
         body: {
@@ -172,16 +170,14 @@ describe("users and addresses API", () => {
     const signupResponse = await signup(server.baseUrl, user);
     const accessToken = signupResponse.body.data.accessToken;
 
-    const deleteResponse = await requestJson<{ data: { id: string; deletedAt: string } }>(
+    const deleteResponse = await requestRoute<{ data: { id: string; deletedAt: string } }>(
       server.baseUrl,
-      "DELETE",
-      "/api/v1/users/me",
+      usersManifest.deleteMe,
       { accessToken },
     );
-    const getAfterDelete = await requestJson<ErrorResponse>(
+    const getAfterDelete = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "GET",
-      "/api/v1/users/me",
+      usersManifest.getMe,
       { accessToken },
     );
 
@@ -205,24 +201,22 @@ describe("users and addresses API", () => {
       line1: "12 Tahrir Street",
       line2: "Apartment 4B",
     });
-    const listed = await requestJson<AddressListResponse>(
+    const listed = await requestRoute<AddressListResponse>(
       server.baseUrl,
-      "GET",
-      "/api/v1/users/me/addresses?page=1&limit=20",
-      { accessToken },
+      usersManifest.listMyAddresses,
+      { accessToken, query: { page: 1, limit: 20 } },
     );
-    const read = await requestJson<AddressResponse>(
+    const read = await requestRoute<AddressResponse>(
       server.baseUrl,
-      "GET",
-      `/api/v1/users/me/addresses/${created.body.data.id}`,
-      { accessToken },
+      usersManifest.getMyAddress,
+      { accessToken, params: { addressId: created.body.data.id } },
     );
-    const updated = await requestJson<AddressResponse>(
+    const updated = await requestRoute<AddressResponse>(
       server.baseUrl,
-      "PATCH",
-      `/api/v1/users/me/addresses/${created.body.data.id}`,
+      usersManifest.updateMyAddress,
       {
         accessToken,
+        params: { addressId: created.body.data.id },
         body: {
           label: "work",
           city: "Giza",
@@ -232,23 +226,20 @@ describe("users and addresses API", () => {
         },
       },
     );
-    const deleted = await requestJson<{ data: { id: string; deletedAt: string } }>(
+    const deleted = await requestRoute<{ data: { id: string; deletedAt: string } }>(
       server.baseUrl,
-      "DELETE",
-      `/api/v1/users/me/addresses/${created.body.data.id}`,
-      { accessToken },
+      usersManifest.deleteMyAddress,
+      { accessToken, params: { addressId: created.body.data.id } },
     );
-    const readAfterDelete = await requestJson<ErrorResponse>(
+    const readAfterDelete = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "GET",
-      `/api/v1/users/me/addresses/${created.body.data.id}`,
-      { accessToken },
+      usersManifest.getMyAddress,
+      { accessToken, params: { addressId: created.body.data.id } },
     );
-    const listAfterDelete = await requestJson<AddressListResponse>(
+    const listAfterDelete = await requestRoute<AddressListResponse>(
       server.baseUrl,
-      "GET",
-      "/api/v1/users/me/addresses?page=1&limit=20",
-      { accessToken },
+      usersManifest.listMyAddresses,
+      { accessToken, query: { page: 1, limit: 20 } },
     );
 
     expect(created.status).toBe(201);
@@ -290,11 +281,13 @@ describe("users and addresses API", () => {
       },
     );
 
-    const strangerRead = await requestJson<ErrorResponse>(
+    const strangerRead = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "GET",
-      `/api/v1/users/me/addresses/${created.body.data.id}`,
-      { accessToken: strangerSignup.body.data.accessToken },
+      usersManifest.getMyAddress,
+      {
+        accessToken: strangerSignup.body.data.accessToken,
+        params: { addressId: created.body.data.id },
+      },
     );
 
     expect(strangerRead.status).toBe(404);
@@ -306,10 +299,9 @@ describe("users and addresses API", () => {
     const signupResponse = await signup(server.baseUrl, user);
     const accessToken = signupResponse.body.data.accessToken;
 
-    const invalidShape = await requestJson<ErrorResponse>(
+    const invalidShape = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/users/me/addresses",
+      usersManifest.createMyAddress,
       {
         accessToken,
         body: {
@@ -320,10 +312,9 @@ describe("users and addresses API", () => {
         },
       },
     );
-    const missingCountry = await requestJson<ErrorResponse>(
+    const missingCountry = await requestRoute<ErrorResponse>(
       server.baseUrl,
-      "POST",
-      "/api/v1/users/me/addresses",
+      usersManifest.createMyAddress,
       {
         accessToken,
         body: {
@@ -346,16 +337,16 @@ async function signup(
   baseUrl: string,
   user: { email: string; username: string; password: string },
 ): Promise<ApiResponse<AuthSuccessResponse>> {
-  return requestJson<AuthSuccessResponse>(baseUrl, "POST", "/api/v1/auth/signup", {
+  return requestRoute<AuthSuccessResponse>(baseUrl, authManifest.signup, {
     body: user,
   });
 }
 
 async function getFirstCountryId(baseUrl: string): Promise<string> {
-  const countries = await requestJson<CountryListResponse>(
+  const countries = await requestRoute<CountryListResponse>(
     baseUrl,
-    "GET",
-    "/api/v1/countries?page=1&limit=20",
+    countriesManifest.listCountries,
+    { query: { page: 1, limit: 20 } },
   );
 
   const firstCountry = countries.body.data[0];
@@ -379,10 +370,9 @@ async function createAddress(
     line2?: string;
   },
 ): Promise<ApiResponse<AddressResponse>> {
-  return requestJson<AddressResponse>(
+  return requestRoute<AddressResponse>(
     baseUrl,
-    "POST",
-    "/api/v1/users/me/addresses",
+    usersManifest.createMyAddress,
     {
       accessToken,
       body: {

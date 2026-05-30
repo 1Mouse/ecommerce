@@ -5,7 +5,7 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/api/v1/users/me/addresses/{{addressId}}
+  url: {{baseUrl}}{{userAddressesUpdateMyPath}}
   body: json
   auth: bearer
 }

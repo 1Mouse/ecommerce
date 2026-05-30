@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { requestJson } from "../helpers/http.ts";
+import { countriesManifest } from "../../src/modules/countries/countries.manifest.ts";
+import { requestJson, requestRoute } from "../helpers/http.ts";
 import {
   connectTestDatabase,
   createTestMongoUri,
@@ -61,10 +62,10 @@ describe("health and countries API", () => {
   it("lists seeded countries with pagination metadata", async () => {
     await seedTestCountries();
 
-    const response = await requestJson<CountryListResponse>(
+    const response = await requestRoute<CountryListResponse>(
       server.baseUrl,
-      "GET",
-      "/api/v1/countries?page=1&limit=20",
+      countriesManifest.listCountries,
+      { query: { page: 1, limit: 20 } },
     );
 
     expect(response.status).toBe(200);

@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/v1/users/me/addresses/{{addressId}}
+  url: {{baseUrl}}{{userAddressesGetMyPath}}
   body: none
   auth: bearer
 }

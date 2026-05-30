@@ -8,4 +8,19 @@ vars {
   refreshToken: paste-refresh-token-here
   countryId: paste-country-id-here
   addressId: paste-address-id-here
+  authSignupPath: /api/v1/auth/signup
+  authLoginPath: /api/v1/auth/login
+  authRefreshPath: /api/v1/auth/refresh
+  authLogoutPath: /api/v1/auth/logout
+  authLogoutAllPath: /api/v1/auth/logout-all
+  usersGetMePath: /api/v1/users/me
+  usersUpdateMePath: /api/v1/users/me
+  usersDeleteMePath: /api/v1/users/me
+  userAddressesListMyPath: /api/v1/users/me/addresses
+  userAddressesCreateMyPath: /api/v1/users/me/addresses
+  userAddressesGetMyPath: /api/v1/users/me/addresses/{{addressId}}
+  userAddressesUpdateMyPath: /api/v1/users/me/addresses/{{addressId}}
+  userAddressesDeleteMyPath: /api/v1/users/me/addresses/{{addressId}}
+  countriesListPath: /api/v1/countries
+  countriesGetByIdPath: /api/v1/countries/{{countryId}}
 }

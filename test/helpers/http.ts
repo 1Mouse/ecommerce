@@ -1,3 +1,6 @@
+import { buildRoutePath } from "../../src/shared/http/define-route.ts";
+import type { RouteDefinition } from "../../src/shared/http/define-route.ts";
+
 type JsonBody = Record<string, unknown> | null;
 
 export type ApiResponse<T = unknown> = {
@@ -32,6 +35,27 @@ export async function requestJson<T = unknown>(
     status: response.status,
     body,
   };
+}
+
+export async function requestRoute<T = unknown>(
+  baseUrl: string,
+  route: RouteDefinition,
+  options: {
+    body?: JsonBody;
+    accessToken?: string;
+    params?: Record<string, string>;
+    query?: Record<string, string | number | boolean | null | undefined>;
+  } = {},
+): Promise<ApiResponse<T>> {
+  return requestJson<T>(
+    baseUrl,
+    route.method.toUpperCase(),
+    buildRoutePath(route.path, options.params, options.query),
+    {
+      body: options.body,
+      accessToken: options.accessToken,
+    },
+  );
 }
 
 export function uniqueUser(prefix = "user"): {
