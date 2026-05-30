@@ -11,49 +11,53 @@ skinparam class {
 }
 
 entity "users" as users {
-  * id : ObjectId
+  * _id : ObjectId
   --
-  * email : string
-  * username : string
+  * email : string <<unique>>
+  * username : string <<unique>>
   * passwordHash : string
   imageExt : string
   phone : string
   dob : date
-  * jwtVersion : number
   * createdAt : date
   * updatedAt : date
   deletedAt : date
 }
 
 entity "userAddresses" as userAddresses {
-  * id : ObjectId
+  * _id : ObjectId
   --
-  * userId : ObjectId
+  * userId : ObjectId <<index>>
   * countryId : ObjectId
+  label : string
   * city : string
   * postalCode : string
+  * line1 : string
+  line2 : string
   * createdAt : date
   * updatedAt : date
   deletedAt : date
 }
 
 entity "countries" as countries {
-  * id : ObjectId
+  * _id : ObjectId
   --
-  * iso2 : string
-  * iso3 : string
-  * name : string
+  * iso2 : string <<unique>>
+  * iso3 : string <<unique>>
+  * name : string <<unique>>
   * createdAt : date
   * updatedAt : date
   deletedAt : date
 }
 
-entity "blacklistedTokens" as blacklistedTokens {
-  * id : ObjectId
+entity "refreshTokens" as refreshTokens {
+  * _id : ObjectId
   --
-  * userId : ObjectId
-  * accessTokenHash : string
-  * refreshTokenHash : string
+  * userId : ObjectId <<index>>
+  * tokenHash : string <<unique>>
+  * expiresAt : date <<ttl>>
+  revokedAt : date
+  replacedByTokenId : ObjectId
   * createdAt : date
   * updatedAt : date
   deletedAt : date
@@ -61,6 +65,6 @@ entity "blacklistedTokens" as blacklistedTokens {
 
 users ||--o{ userAddresses : has
 countries ||--o{ userAddresses : used_by
-users ||--o{ blacklistedTokens : owns
+users ||--o{ refreshTokens : owns
 
 @enduml
