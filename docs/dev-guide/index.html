@@ -7,20 +7,20 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg: #0b1020;
-        --panel: #121a2f;
-        --panel-2: #17223b;
-        --text: #edf4ff;
-        --muted: #a8b5ce;
-        --soft: #75839d;
-        --blue: #6ea8fe;
+        --bg: #070b15;
+        --panel: #101827;
+        --panel-2: #152136;
+        --text: #eef6ff;
+        --muted: #a7b4ca;
+        --soft: #75849e;
+        --line: rgba(255, 255, 255, 0.13);
+        --blue: #72a7ff;
         --cyan: #5eead4;
-        --green: #86efac;
-        --amber: #fbbf24;
+        --green: #8df5b5;
+        --amber: #facc15;
         --red: #fb7185;
         --purple: #c084fc;
-        --line: rgba(255, 255, 255, 0.14);
-        --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+        --shadow: 0 26px 80px rgba(0, 0, 0, 0.36);
         font-family:
           Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
           "Segoe UI", sans-serif;
@@ -36,12 +36,13 @@
 
       body {
         margin: 0;
-        background:
-          radial-gradient(circle at top left, rgba(110, 168, 254, 0.24), transparent 34rem),
-          radial-gradient(circle at 85% 8%, rgba(94, 234, 212, 0.14), transparent 28rem),
-          linear-gradient(135deg, #080c18 0%, var(--bg) 50%, #101729 100%);
         color: var(--text);
         line-height: 1.65;
+        background:
+          radial-gradient(circle at 10% 4%, rgba(114, 167, 255, 0.24), transparent 33rem),
+          radial-gradient(circle at 86% 12%, rgba(94, 234, 212, 0.16), transparent 32rem),
+          radial-gradient(circle at 55% 75%, rgba(192, 132, 252, 0.08), transparent 35rem),
+          linear-gradient(135deg, #050814 0%, var(--bg) 48%, #0e1628 100%);
       }
 
       a {
@@ -53,9 +54,33 @@
         text-decoration: underline;
       }
 
+      code,
+      pre {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      code {
+        padding: 0.14rem 0.38rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 7px;
+        background: rgba(0, 0, 0, 0.25);
+        color: #dbeafe;
+        font-size: 0.92em;
+      }
+
+      pre {
+        margin: 0;
+        padding: 18px;
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #070c17;
+        color: #dbeafe;
+      }
+
       .layout {
         display: grid;
-        grid-template-columns: 280px minmax(0, 1fr);
+        grid-template-columns: 286px minmax(0, 1fr);
         min-height: 100vh;
       }
 
@@ -64,29 +89,28 @@
         top: 0;
         height: 100vh;
         padding: 28px 22px;
-        border-right: 1px solid var(--line);
-        background: rgba(8, 12, 24, 0.78);
-        backdrop-filter: blur(18px);
         overflow-y: auto;
+        border-right: 1px solid var(--line);
+        background: rgba(5, 8, 20, 0.82);
+        backdrop-filter: blur(18px);
       }
 
       .brand {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 26px;
+        margin-bottom: 24px;
       }
 
       .logo {
         display: grid;
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         place-items: center;
-        border-radius: 14px;
+        border-radius: 15px;
         background: linear-gradient(135deg, var(--blue), var(--cyan));
-        color: #07111f;
+        color: #06101d;
         font-weight: 900;
-        box-shadow: 0 12px 32px rgba(94, 234, 212, 0.2);
       }
 
       .brand strong {
@@ -101,7 +125,7 @@
 
       nav {
         display: grid;
-        gap: 8px;
+        gap: 7px;
       }
 
       nav a {
@@ -118,27 +142,37 @@
       }
 
       main {
-        max-width: 1180px;
+        max-width: 1220px;
         padding: 48px 42px 80px;
+      }
+
+      .hero,
+      .card,
+      .diagram,
+      .callout,
+      .stat,
+      table {
+        border: 1px solid var(--line);
+        background: rgba(16, 24, 39, 0.82);
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
       }
 
       .hero {
         padding: 48px;
-        border: 1px solid var(--line);
         border-radius: 30px;
         background:
-          linear-gradient(135deg, rgba(18, 26, 47, 0.92), rgba(23, 34, 59, 0.72)),
-          radial-gradient(circle at 70% 10%, rgba(110, 168, 254, 0.22), transparent 26rem);
+          linear-gradient(135deg, rgba(16, 24, 39, 0.96), rgba(21, 33, 54, 0.76)),
+          radial-gradient(circle at 76% 14%, rgba(94, 234, 212, 0.16), transparent 24rem);
         box-shadow: var(--shadow);
       }
 
       .eyebrow {
         margin: 0 0 12px;
         color: var(--cyan);
+        font-size: 0.78rem;
         font-weight: 800;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        font-size: 0.78rem;
       }
 
       h1,
@@ -148,41 +182,41 @@
       }
 
       h1 {
-        max-width: 920px;
+        max-width: 940px;
         margin: 0;
-        font-size: clamp(2.4rem, 5vw, 5rem);
+        font-size: clamp(2.35rem, 5vw, 4.9rem);
         letter-spacing: -0.06em;
       }
 
       h2 {
         margin: 0 0 18px;
-        font-size: clamp(1.7rem, 3vw, 2.6rem);
+        font-size: clamp(1.72rem, 3vw, 2.55rem);
         letter-spacing: -0.035em;
       }
 
       h3 {
         margin: 0 0 10px;
-        font-size: 1.1rem;
+        font-size: 1.08rem;
+      }
+
+      section {
+        margin-top: 56px;
       }
 
       .lead {
-        max-width: 820px;
+        max-width: 850px;
         margin: 22px 0 0;
         color: var(--muted);
         font-size: 1.15rem;
       }
 
-      .hero-grid,
       .grid-2,
       .grid-3,
-      .grid-4 {
+      .grid-4,
+      .hero-grid,
+      .flow {
         display: grid;
         gap: 18px;
-      }
-
-      .hero-grid {
-        grid-template-columns: repeat(4, 1fr);
-        margin-top: 34px;
       }
 
       .grid-2 {
@@ -193,44 +227,38 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
-      .grid-4 {
+      .grid-4,
+      .hero-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
 
-      section {
-        margin-top: 54px;
-      }
-
-      .card,
-      .stat,
-      .diagram,
-      .callout {
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        background: rgba(18, 26, 47, 0.8);
-        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+      .hero-grid {
+        margin-top: 34px;
       }
 
       .card,
       .diagram,
       .callout {
         padding: 22px;
+        border-radius: 22px;
       }
 
       .stat {
         padding: 18px;
+        border-radius: 20px;
       }
 
       .stat strong {
         display: block;
-        font-size: 1.65rem;
+        font-size: 1.45rem;
         letter-spacing: -0.04em;
       }
 
       .stat span,
       .card p,
       .callout p,
-      li {
+      li,
+      td {
         color: var(--muted);
       }
 
@@ -239,7 +267,8 @@
         margin: 0;
       }
 
-      .tag-row {
+      .tag-row,
+      .legend {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
@@ -253,8 +282,8 @@
         padding: 5px 10px;
         border: 1px solid var(--line);
         border-radius: 999px;
-        color: var(--muted);
         background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
         font-size: 0.83rem;
       }
 
@@ -271,30 +300,6 @@
       .dot.purple { background: var(--purple); }
       .dot.red { background: var(--red); }
 
-      code,
-      pre {
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      }
-
-      code {
-        padding: 0.17rem 0.38rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 7px;
-        background: rgba(0, 0, 0, 0.24);
-        color: #dbeafe;
-        font-size: 0.92em;
-      }
-
-      pre {
-        margin: 0;
-        padding: 18px;
-        overflow-x: auto;
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        background: #080d19;
-        color: #dbeafe;
-      }
-
       .diagram-title {
         display: flex;
         align-items: center;
@@ -309,15 +314,12 @@
       }
 
       .flow {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(120px, 1fr));
-        align-items: stretch;
-        gap: 12px;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
       }
 
       .box {
         position: relative;
-        min-height: 110px;
+        min-height: 118px;
         padding: 16px;
         border: 1px solid var(--line);
         border-radius: 18px;
@@ -343,46 +345,6 @@
         color: var(--muted);
       }
 
-      .onion {
-        display: grid;
-        place-items: center;
-        min-height: 420px;
-      }
-
-      .ring {
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.035);
-      }
-
-      .ring.outer {
-        width: min(620px, 90vw);
-        height: min(620px, 90vw);
-        background: radial-gradient(circle, rgba(110, 168, 254, 0.04), rgba(110, 168, 254, 0.12));
-      }
-
-      .ring.mid {
-        width: 72%;
-        height: 72%;
-        background: radial-gradient(circle, rgba(94, 234, 212, 0.04), rgba(94, 234, 212, 0.12));
-      }
-
-      .ring.inner {
-        width: 62%;
-        height: 62%;
-        background: radial-gradient(circle, rgba(134, 239, 172, 0.08), rgba(134, 239, 172, 0.17));
-      }
-
-      .ring.core {
-        width: 55%;
-        height: 55%;
-        padding: 20px;
-        text-align: center;
-        background: linear-gradient(135deg, rgba(192, 132, 252, 0.24), rgba(110, 168, 254, 0.2));
-      }
-
       .tree {
         display: grid;
         gap: 8px;
@@ -390,7 +352,7 @@
 
       .tree-row {
         display: grid;
-        grid-template-columns: 210px minmax(0, 1fr);
+        grid-template-columns: 235px minmax(0, 1fr);
         gap: 12px;
         align-items: start;
         padding: 12px 0;
@@ -401,12 +363,47 @@
         border-bottom: 0;
       }
 
-      .tree-row strong {
-        color: var(--text);
-      }
-
       .tree-row span {
         color: var(--muted);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 18px;
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .callout {
+        border-color: rgba(94, 234, 212, 0.3);
+        background: linear-gradient(135deg, rgba(94, 234, 212, 0.09), rgba(114, 167, 255, 0.06));
+      }
+
+      .warning {
+        border-color: rgba(250, 204, 21, 0.36);
+        background: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(251, 113, 133, 0.05));
+      }
+
+      .danger {
+        border-color: rgba(251, 113, 133, 0.38);
+        background: linear-gradient(135deg, rgba(251, 113, 133, 0.08), rgba(192, 132, 252, 0.05));
       }
 
       .timeline {
@@ -416,10 +413,9 @@
       }
 
       .step {
-        position: relative;
         display: grid;
-        grid-template-columns: 54px minmax(0, 1fr);
-        gap: 16px;
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 15px;
         align-items: start;
         padding: 18px;
         border: 1px solid var(--line);
@@ -436,60 +432,13 @@
         place-items: center;
         border-radius: 14px;
         background: linear-gradient(135deg, var(--cyan), var(--blue));
-        color: #07111f;
+        color: #06101d;
         font-weight: 900;
       }
 
       .step p {
         margin: 6px 0 0;
         color: var(--muted);
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        background: rgba(18, 26, 47, 0.7);
-      }
-
-      th,
-      td {
-        padding: 14px 16px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        text-align: left;
-        vertical-align: top;
-      }
-
-      th {
-        color: var(--text);
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      td {
-        color: var(--muted);
-      }
-
-      tr:last-child td {
-        border-bottom: 0;
-      }
-
-      .callout {
-        border-color: rgba(94, 234, 212, 0.3);
-        background: linear-gradient(135deg, rgba(94, 234, 212, 0.09), rgba(110, 168, 254, 0.07));
-      }
-
-      .warning {
-        border-color: rgba(251, 191, 36, 0.35);
-        background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(251, 113, 133, 0.05));
-      }
-
-      .legend {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 18px;
       }
 
       footer {
@@ -499,7 +448,7 @@
         color: var(--soft);
       }
 
-      @media (max-width: 1000px) {
+      @media (max-width: 1040px) {
         .layout {
           grid-template-columns: 1fr;
         }
@@ -521,10 +470,10 @@
           padding: 30px 22px;
         }
 
-        .hero-grid,
         .grid-2,
         .grid-3,
         .grid-4,
+        .hero-grid,
         .flow {
           grid-template-columns: 1fr;
         }
@@ -550,101 +499,81 @@
           <div class="logo">BE</div>
           <div>
             <strong>Ecommerce API</strong>
-            <span>Developer Guide</span>
+            <span>Architecture Guide</span>
           </div>
         </div>
         <nav aria-label="Guide navigation">
-          <a href="#why">Why It Feels Overwhelming</a>
-          <a href="#current">Current Project</a>
+          <a href="#overview">Overview</a>
+          <a href="#architecture">Architecture</a>
           <a href="#request-flow">Request Flow</a>
-          <a href="#folders">Folder Structure</a>
-          <a href="#middleware">Express Pipeline</a>
-          <a href="#auth">Auth Architecture</a>
-          <a href="#rules">Architecture Rules</a>
-          <a href="#roadmap">Architecture Ahead</a>
-          <a href="#commands">Daily Commands</a>
+          <a href="#modules">Modules</a>
+          <a href="#manifests">Route Manifests</a>
+          <a href="#layers">Layer Duties</a>
+          <a href="#data">Data And Persistence</a>
+          <a href="#auth">Auth Model</a>
+          <a href="#testing">Testing</a>
+          <a href="#bruno">Bruno</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#guardrails">Guardrails</a>
         </nav>
       </aside>
 
       <main>
-        <header class="hero">
-          <p class="eyebrow">Learning backend without drowning in choices</p>
-          <h1>A visual guide to this Express ecommerce backend</h1>
+        <header class="hero" id="overview">
+          <p class="eyebrow">Current backend shape</p>
+          <h1>Modular monolith with explicit contracts and boring boundaries</h1>
           <p class="lead">
-            Express gives you freedom, which can feel like chaos. This project uses that freedom with a clear rule: keep HTTP, business logic, persistence, and wiring separated so the code can grow from auth into products, orders, payments, chat, jobs, and multi-tenancy.
+            This project uses Express without letting Express become a pile of scattered handlers. Each feature owns its routes, schemas, controllers, services, repositories, models, tests, Bruno requests, and documentation. The goal is clarity first: every public API path is searchable, every layer has one job, and tests verify behavior through HTTP.
           </p>
           <div class="hero-grid">
             <div class="stat">
               <strong>Express 5</strong>
-              <span>HTTP routing and middleware</span>
+              <span>HTTP pipeline and routing</span>
             </div>
             <div class="stat">
               <strong>MongoDB</strong>
-              <span>Containerized with Podman</span>
+              <span>Mongoose models and repositories</span>
             </div>
             <div class="stat">
-              <strong>JWT</strong>
-              <span>Access and refresh tokens</span>
+              <strong>Vitest</strong>
+              <span>Integration tests through public APIs</span>
             </div>
             <div class="stat">
               <strong>Bruno</strong>
-              <span>API docs and request testing</span>
+              <span>Manual API docs synced from route manifests</span>
             </div>
           </div>
         </header>
 
-        <section id="why">
-          <h2>Why Express Feels All Over The Place</h2>
+        <section id="architecture">
+          <h2>Architecture</h2>
           <div class="grid-3">
             <article class="card">
-              <h3>Express is unopinionated</h3>
-              <p>It does not force controllers, services, repositories, modules, decorators, or dependency injection. That is why two Express apps can look completely different.</p>
+              <h3>Modular Monolith</h3>
+              <p>One deployable Node API, split internally by business modules. We avoid microservice complexity while still keeping clean module boundaries.</p>
             </article>
             <article class="card">
-              <h3>Middleware is powerful</h3>
-              <p>Almost everything is a function in a pipeline: security, CORS, JSON parsing, logging, auth checks, validation, routes, 404s, and errors.</p>
+              <h3>Feature Locality</h3>
+              <p>Feature code lives together under <code>src/modules</code>. Auth code stays in auth. User/address code stays in users. Country reference data stays in countries.</p>
             </article>
             <article class="card">
-              <h3>Architecture is your job</h3>
-              <p>The framework handles HTTP. We decide the application structure. Our goal is not to add complexity, but to put each concern in a predictable place.</p>
+              <h3>Explicit Contracts</h3>
+              <p>Every route has a manifest entry with full path, method, auth requirement, and validation schemas. Route discovery is no longer split between <code>app.ts</code> and routers.</p>
             </article>
           </div>
-          <div class="callout warning" style="margin-top: 18px;">
-            <h3>The practical mindset</h3>
-            <p>Enterprise style does not mean adding every pattern early. It means clear boundaries, boring conventions, testable business logic, and infrastructure that can be replaced without rewriting the app.</p>
-          </div>
-        </section>
 
-        <section id="current">
-          <h2>Current Project Snapshot</h2>
-          <div class="diagram">
+          <div class="diagram" style="margin-top: 18px;">
             <div class="diagram-title">
-              <h3>What exists today</h3>
-              <span>Auth first, with room to grow</span>
+              <h3>Dependency Direction</h3>
+              <span>Outer HTTP layer drives inner application behavior</span>
             </div>
-            <div class="grid-4">
-              <div class="box">
-                <strong>HTTP API</strong>
-                <small><code>src/app.ts</code> defines global middleware, routes, 404 handling, and error handling.</small>
-              </div>
-              <div class="box">
-                <strong>Auth Module</strong>
-                <small>Signup, login, refresh token rotation, password hashing, JWT creation.</small>
-              </div>
-              <div class="box">
-                <strong>Persistence</strong>
-                <small>Mongoose models and repositories for users and refresh tokens.</small>
-              </div>
-              <div class="box">
-                <strong>Operations</strong>
-                <small>Podman MongoDB, API Containerfile, health check, Bruno request docs.</small>
-              </div>
-            </div>
-            <div class="legend">
-              <span class="tag"><span class="dot blue"></span>Node native TypeScript</span>
-              <span class="tag"><span class="dot cyan"></span>Express middleware</span>
-              <span class="tag"><span class="dot green"></span>Mongoose repositories</span>
-              <span class="tag"><span class="dot amber"></span>JWT auth</span>
+            <div class="flow">
+              <div class="box"><strong>Client</strong><small>Frontend, Bruno, curl, tests, mobile app.</small></div>
+              <div class="box"><strong>Routes</strong><small>Map manifest operations to middleware and controller methods.</small></div>
+              <div class="box"><strong>Controller</strong><small>HTTP input/output only. No persistence rules.</small></div>
+              <div class="box"><strong>Service</strong><small>Application workflow and business decisions.</small></div>
+              <div class="box"><strong>Repository</strong><small>Persistence boundary. Returns plain app objects.</small></div>
+              <div class="box"><strong>Model</strong><small>Mongoose schemas, indexes, timestamps.</small></div>
             </div>
           </div>
         </section>
@@ -653,336 +582,351 @@
           <h2>Request Flow</h2>
           <div class="diagram">
             <div class="diagram-title">
-              <h3>Example: <code>POST /api/v1/auth/login</code></h3>
-              <span>From browser/Bruno to MongoDB and back</span>
+              <h3>Example: <code>POST /api/v1/auth/refresh</code></h3>
+              <span>Manifest path to service behavior</span>
             </div>
             <div class="flow">
-              <div class="box">
-                <strong>Client</strong>
-                <small>Frontend, Bruno, curl, or mobile app sends JSON.</small>
-              </div>
-              <div class="box">
-                <strong>Middleware</strong>
-                <small>Helmet, CORS, JSON body parser, request logging.</small>
-              </div>
-              <div class="box">
-                <strong>Route + Controller</strong>
-                <small>Auth route chooses the controller method for login.</small>
-              </div>
-              <div class="box">
-                <strong>Service</strong>
-                <small>Validates credentials, hashes/checks password, creates tokens.</small>
-              </div>
-              <div class="box">
-                <strong>Repositories</strong>
-                <small>Read/write users and refresh token hashes using Mongoose.</small>
-              </div>
+              <div class="box"><strong>Manifest</strong><small><code>auth.manifest.ts</code> declares <code>/api/v1/auth/refresh</code>.</small></div>
+              <div class="box"><strong>Route</strong><small><code>auth.routes.ts</code> uses manifest path and body schema.</small></div>
+              <div class="box"><strong>Controller</strong><small>Reads validated body and sends response envelope.</small></div>
+              <div class="box"><strong>Service</strong><small>Validates refresh token, rotates it, creates new tokens.</small></div>
+              <div class="box"><strong>Repository</strong><small>Reads/revokes refresh-token records by hash.</small></div>
+              <div class="box"><strong>MongoDB</strong><small>Stores only refresh token hashes, never raw tokens.</small></div>
             </div>
           </div>
         </section>
 
-        <section id="folders">
-          <h2>Folder Structure</h2>
+        <section id="modules">
+          <h2>Modules</h2>
+          <div class="grid-3">
+            <article class="card">
+              <h3><code>auth</code></h3>
+              <p>Signup, login, refresh-token rotation, logout, logout-all, access-token middleware, password hashing, JWT signing, and refresh-token persistence.</p>
+            </article>
+            <article class="card">
+              <h3><code>users</code></h3>
+              <p>Current-user read/update/delete plus user-owned address CRUD. It calls <code>CountriesService</code> to validate country references.</p>
+            </article>
+            <article class="card">
+              <h3><code>countries</code></h3>
+              <p>Country reference data. Public API is read-only now. Service/repository write methods exist for seeds and future admin routes.</p>
+            </article>
+          </div>
+
+          <div class="diagram" style="margin-top: 18px;">
+            <div class="diagram-title">
+              <h3>Module Shape</h3>
+              <span>Keep the same file vocabulary in every feature</span>
+            </div>
+            <pre><code>src/modules/auth/
+  auth.manifest.ts       # public route contract metadata
+  auth.routes.ts         # Express route registration
+  auth.controller.ts     # HTTP request/response boundary
+  auth.service.ts        # auth workflows
+  auth.schema.ts         # Zod request validation
+  auth.middleware.ts     # access-token auth guard
+  refresh-token.model.ts
+  refresh-token.repository.ts
+
+src/modules/users/
+  users.manifest.ts
+  users.routes.ts
+  users.controller.ts
+  users.service.ts
+  users.schema.ts
+  user.model.ts
+  user.repository.ts
+  user-address.model.ts
+  user-address.repository.ts
+  user-addresses.controller.ts
+  user-addresses.service.ts
+  user-addresses.schema.ts
+
+src/modules/countries/
+  countries.manifest.ts
+  countries.routes.ts
+  countries.controller.ts
+  countries.service.ts
+  countries.schema.ts
+  country.model.ts
+  country.repository.ts</code></pre>
+          </div>
+        </section>
+
+        <section id="manifests">
+          <h2>Route Manifests</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Why They Exist</h3>
+              <p>Express normally hides the full route across <code>app.use('/prefix')</code> and <code>router.post('/child')</code>. Manifests keep the full public route in one searchable place.</p>
+              <div class="tag-row">
+                <span class="tag"><span class="dot"></span>Searchable paths</span>
+                <span class="tag"><span class="dot blue"></span>Version metadata</span>
+                <span class="tag"><span class="dot green"></span>Schema metadata</span>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Route Identity</h3>
+              <p>The <code>name</code> field is a stable operation identifier. The <code>path</code> can change for versioning, but <code>auth.login</code> still means the login operation.</p>
+            </div>
+          </div>
+
+          <div class="diagram" style="margin-top: 18px;">
+            <div class="diagram-title">
+              <h3>Manifest Example</h3>
+              <span>Operation-first: one method plus one path</span>
+            </div>
+            <pre><code>export const authManifest = {
+  refresh: defineRoute({
+    name: "auth.refresh",
+    brunoVar: "authRefreshPath",
+    version: "v1",
+    method: "post",
+    path: "/api/v1/auth/refresh",
+    auth: "public",
+    bodySchema: refreshBodySchema,
+  }),
+} as const;</code></pre>
+          </div>
+
+          <div class="callout" style="margin-top: 18px;">
+            <h3>Versioning Rule</h3>
+            <p>Keep full paths explicit, like <code>/api/v1/auth/refresh</code>. When v2 exists, add v2 manifest entries instead of hiding versions in string builders. Public contracts should be easy to grep.</p>
+          </div>
+        </section>
+
+        <section id="layers">
+          <h2>Layer Duties</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Purpose</th>
+                <th>Must Not Do</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>*.manifest.ts</code></td><td>Declare route contract metadata: name, version, method, path, auth, request schemas, Bruno variable.</td><td>Run code, query DB, or call controllers.</td></tr>
+              <tr><td><code>*.routes.ts</code></td><td>Register Express routes using manifest paths and route-level middleware.</td><td>Contain business rules.</td></tr>
+              <tr><td><code>*.controller.ts</code></td><td>Translate HTTP requests to service calls and service results to response envelopes.</td><td>Call repositories directly or know Mongoose details.</td></tr>
+              <tr><td><code>*.service.ts</code></td><td>Own workflows, business decisions, cross-module service calls, and error semantics.</td><td>Import Express request/response objects.</td></tr>
+              <tr><td><code>*.repository.ts</code></td><td>Hide Mongoose queries and return plain app objects with <code>id</code>, not raw documents.</td><td>Contain HTTP behavior or response formatting.</td></tr>
+              <tr><td><code>*.model.ts</code></td><td>Define Mongoose schema, collection name, timestamps, indexes, and Mongo constraints.</td><td>Run application workflows.</td></tr>
+              <tr><td><code>*.schema.ts</code></td><td>Validate request body, params, and query using Zod strip mode.</td><td>Check database existence. That is service-level semantics.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="data">
+          <h2>Data And Persistence</h2>
           <div class="grid-2">
             <div class="diagram">
               <div class="diagram-title">
-                <h3>Current layout</h3>
-                <span>Feature modules plus shared infrastructure</span>
+                <h3>Collections</h3>
+                <span>Initial auth/users slice</span>
               </div>
-              <pre><code>src/
-  app.ts
-  server.ts
-  container.ts
-  config/
-    env.ts
-  infrastructure/
-    database/
-      mongodb.ts
-  modules/
-    auth/
-      auth.controller.ts
-      auth.routes.ts
-      auth.schemas.ts
-      auth.service.ts
-      password.service.ts
-      token.service.ts
-    users/
-      user.model.ts
-      user.repository.ts
-      user.mapper.ts
-      user.types.ts
-    refresh-tokens/
-      refresh-token.model.ts
-      refresh-token.repository.ts
-      refresh-token.mapper.ts
-      refresh-token.types.ts
-  shared/
-    errors/
-    http/
-    utils/</code></pre>
+              <pre><code>users
+userAddresses
+countries
+refreshTokens</code></pre>
             </div>
-
             <div class="diagram">
               <div class="diagram-title">
-                <h3>What each area means</h3>
-                <span>Where to put new code</span>
+                <h3>Repository Pattern</h3>
+                <span>Shared base plus feature-specific repositories</span>
               </div>
-              <div class="tree">
-                <div class="tree-row">
-                  <strong><code>app.ts</code></strong>
-                  <span>Express application setup: global middleware, public routes, module routes, 404 handler, error handler.</span>
-                </div>
-                <div class="tree-row">
-                  <strong><code>server.ts</code></strong>
-                  <span>Runtime bootstrap: load env, connect Mongo, listen on port, graceful shutdown.</span>
-                </div>
-                <div class="tree-row">
-                  <strong><code>container.ts</code></strong>
-                  <span>Composition root: creates services, repositories, and controllers in one place.</span>
-                </div>
-                <div class="tree-row">
-                  <strong><code>modules/</code></strong>
-                  <span>Feature areas. Auth is a feature. Products, orders, payments, chat, and tenants can become features too.</span>
-                </div>
-                <div class="tree-row">
-                  <strong><code>infrastructure/</code></strong>
-                  <span>External systems: MongoDB, future Postgres, Redis, object storage, email provider, payment SDK.</span>
-                </div>
-                <div class="tree-row">
-                  <strong><code>shared/</code></strong>
-                  <span>Cross-cutting backend utilities: errors, validation helpers, API response helpers, async route wrapper.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+              <pre><code>src/infrastructure/database/mongodb/
+  mongo-base-crud.repository.ts
 
-        <section id="middleware">
-          <h2>Express Pipeline In This Project</h2>
-          <div class="diagram">
-            <div class="diagram-title">
-              <h3><code>src/app.ts</code></h3>
-              <span>Order matters</span>
-            </div>
-            <div class="flow">
-              <div class="box">
-                <strong>Security</strong>
-                <small><code>helmet()</code> adds safer response headers.</small>
-              </div>
-              <div class="box">
-                <strong>Browser Access</strong>
-                <small><code>cors()</code> controls which frontends can call the API.</small>
-              </div>
-              <div class="box">
-                <strong>Body Parser</strong>
-                <small><code>express.json()</code> parses JSON request bodies. Multipart uploads will use route-level middleware later.</small>
-              </div>
-              <div class="box">
-                <strong>Logging</strong>
-                <small><code>pinoHttp()</code> logs requests and responses.</small>
-              </div>
-              <div class="box">
-                <strong>Routes + Errors</strong>
-                <small>Routes first, then 404 handler, then global error handler.</small>
-              </div>
+src/modules/users/user.repository.ts
+src/modules/users/user-address.repository.ts
+src/modules/countries/country.repository.ts
+src/modules/auth/refresh-token.repository.ts</code></pre>
             </div>
           </div>
-          <div class="callout" style="margin-top: 18px;">
-            <h3>Remember this rule</h3>
-            <p>Express runs middleware top to bottom. Parsers and security go before routes. <code>notFoundHandler</code> and <code>errorHandler</code> go at the end.</p>
+
+          <div class="grid-3" style="margin-top: 18px;">
+            <article class="card"><h3>Soft Deletes</h3><p>Normal reads exclude records with <code>deletedAt</code>. Deletes set <code>deletedAt</code> and return a <code>200</code> envelope.</p></article>
+            <article class="card"><h3>Timestamps</h3><p>Mongoose manages <code>createdAt</code> and <code>updatedAt</code> with <code>timestamps: true</code>. The app manages <code>deletedAt</code>.</p></article>
+            <article class="card"><h3>Index Discipline</h3><p>Indexes exist only for unique constraints, frequent lookups, and TTL cleanup. Do not index every foreign key by default.</p></article>
           </div>
         </section>
 
         <section id="auth">
-          <h2>Auth Architecture</h2>
-          <div class="grid-2">
-            <div class="diagram">
-              <div class="diagram-title">
-                <h3>Signup/login/refresh</h3>
-                <span>Why several files exist</span>
-              </div>
-              <div class="timeline">
-                <div class="step">
-                  <div>
-                    <h3>Route</h3>
-                    <p><code>auth.routes.ts</code> maps URLs like <code>/signup</code> and <code>/login</code> to controller methods.</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div>
-                    <h3>Controller</h3>
-                    <p><code>auth.controller.ts</code> reads HTTP input and sends HTTP responses. It should stay thin.</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div>
-                    <h3>Schema</h3>
-                    <p><code>auth.schemas.ts</code> validates request bodies with Zod before the service trusts them.</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div>
-                    <h3>Service</h3>
-                    <p><code>auth.service.ts</code> owns the application workflow: create user, verify password, rotate refresh token.</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div>
-                    <h3>Repositories</h3>
-                    <p>Repositories hide Mongoose so the service does not need to know database query details.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="diagram">
-              <div class="diagram-title">
-                <h3>Token model</h3>
-                <span>Current security choices</span>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Piece</th>
-                    <th>Meaning</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Access token</td>
-                    <td>Short-lived JWT used to call protected routes later.</td>
-                  </tr>
-                  <tr>
-                    <td>Refresh token</td>
-                    <td>Longer-lived token used to get a new access token.</td>
-                  </tr>
-                  <tr>
-                    <td>Refresh hash</td>
-                    <td>The database stores a SHA-256 hash, not the raw refresh token.</td>
-                  </tr>
-                  <tr>
-                    <td>Rotation</td>
-                    <td>When refresh succeeds, the old refresh token is revoked and a new one is created.</td>
-                  </tr>
-                  <tr>
-                    <td>Password hash</td>
-                    <td>Passwords are stored with <code>bcryptjs</code>, never as plain text.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="rules">
-          <h2>Architecture Rules</h2>
-          <div class="diagram onion">
-            <div class="ring outer">
-              <div class="ring mid">
-                <div class="ring inner">
-                  <div class="ring core">
-                    <div>
-                      <h3>Business Rules</h3>
-                      <p style="margin: 0; color: var(--muted);">Keep the important logic away from framework details.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="grid-3" style="margin-top: 18px;">
+          <h2>Auth Model</h2>
+          <div class="grid-3">
             <article class="card">
-              <h3>Controllers do HTTP</h3>
-              <p>They receive requests, call services, and return responses. They should not contain database queries or deep business rules.</p>
+              <h3>Access Token</h3>
+              <p>JWT created with <code>jose</code>. It is stateless and short-lived: 15 minutes. Middleware verifies signature, expiry, and <code>type: access</code>.</p>
             </article>
             <article class="card">
-              <h3>Services orchestrate</h3>
-              <p>They coordinate validation results, repositories, password hashing, token creation, and domain decisions.</p>
+              <h3>Refresh Token</h3>
+              <p>Opaque random string, not JWT. We store only SHA-256 hashes in <code>refreshTokens</code>. Lifetime is 30 days.</p>
             </article>
             <article class="card">
-              <h3>Repositories persist</h3>
-              <p>They translate between app objects and database models. Mongoose should stay near this boundary.</p>
+              <h3>Password</h3>
+              <p>Passwords use <code>bcryptjs</code>. Raw passwords never leave the request workflow and are never stored.</p>
             </article>
           </div>
           <div class="callout warning" style="margin-top: 18px;">
-            <h3>Do not over-engineer too early</h3>
-            <p>We are using enterprise-shaped boundaries, not full enterprise ceremony. We will introduce stricter DDD, CQRS, events, queues, and adapters only when the project needs them.</p>
+            <h3>Logout Reality</h3>
+            <p>Logout revokes refresh tokens. Existing stateless access tokens may work until their 15-minute expiry. This is a deliberate tradeoff for simpler, faster protected routes.</p>
           </div>
         </section>
 
-        <section id="roadmap">
-          <h2>Architecture Ahead</h2>
-          <div class="timeline">
-            <div class="step">
-              <div>
-                <h3>Protected routes</h3>
-                <p>Add access-token middleware and a <code>GET /api/v1/me</code> route. This teaches auth guards and request context.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div>
-                <h3>Products module</h3>
-                <p>Add products with JSON first, then image upload with route-level multipart middleware such as Multer.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div>
-                <h3>Orders module</h3>
-                <p>Model order placement as a business workflow, not just CRUD. This is where domain rules become more interesting.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div>
-                <h3>Payments</h3>
-                <p>Add a payment adapter boundary so Stripe or another provider does not leak into the core order workflow.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div>
-                <h3>Background jobs and cron</h3>
-                <p>Add scheduled work for cleanup, token expiry, emails, reports, or abandoned carts.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div>
-                <h3>WebSockets and streaming</h3>
-                <p>Add chat and an AI chatbot to practice persistent connections and streaming responses.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div>
-                <h3>Multi-tenancy and database adapters</h3>
-                <p>Introduce tenant context and eventually a Postgres adapter where it teaches useful architecture instead of adding accidental complexity.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="commands">
-          <h2>Daily Commands</h2>
+        <section id="testing">
+          <h2>Testing</h2>
           <div class="grid-2">
             <div class="card">
-              <h3>Run locally</h3>
+              <h3>Testing Philosophy</h3>
+              <p>Tests verify behavior through public HTTP interfaces. They do not call private services, repositories, or Mongoose models directly.</p>
+            </div>
+            <div class="card">
+              <h3>Current Stack</h3>
+              <p>Vitest runs integration-style tests against the Express app and a real isolated MongoDB test database.</p>
+            </div>
+          </div>
+
+          <div class="diagram" style="margin-top: 18px;">
+            <div class="diagram-title">
+              <h3>Test Layout</h3>
+              <span>Public behavior over implementation details</span>
+            </div>
+            <pre><code>test/helpers/
+  test-db.ts       # isolated Mongo test database
+  test-server.ts   # starts app on random port
+  http.ts          # requestRoute helper using manifests
+
+test/auth-users/
+  health-countries.test.ts
+  auth.flow.test.ts
+  users-addresses.flow.test.ts</code></pre>
+          </div>
+
+          <div class="callout" style="margin-top: 18px;">
+            <h3>TDD Rule</h3>
+            <p>Do not write all tests first. Use vertical slices: one behavior test, minimal implementation, refactor, repeat. New features start with a failing public-interface test.</p>
+          </div>
+        </section>
+
+        <section id="bruno">
+          <h2>Bruno</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Purpose</h3>
+              <p>Bruno is our manual API documentation and exploratory client. It should mirror real public routes, auth behavior, and example request bodies.</p>
+            </div>
+            <div class="card">
+              <h3>Route Sync</h3>
+              <p>Bruno paths are variables generated from route manifests. Run <code>pnpm sync:bruno-routes</code> after route path changes.</p>
+            </div>
+          </div>
+          <div class="diagram" style="margin-top: 18px;">
+            <div class="diagram-title">
+              <h3>Bruno Token Flow</h3>
+              <span>Manual requests stay usable after login/refresh</span>
+            </div>
+            <pre><code>Signup/Login/Refresh scripts set:
+  userId
+  accessToken
+  refreshToken
+
+List Countries script sets:
+  countryId
+
+Create My Address script sets:
+  addressId</code></pre>
+          </div>
+        </section>
+
+        <section id="workflow">
+          <h2>Common Workflow</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Daily Local Run</h3>
               <pre><code>podman compose up -d mongo
+pnpm seed:countries
 pnpm dev</code></pre>
             </div>
             <div class="card">
-              <h3>Check types</h3>
-              <pre><code>pnpm typecheck</code></pre>
+              <h3>Quality Checks</h3>
+              <pre><code>pnpm typecheck
+pnpm test
+bash -ic 'shopt -s globstar; planetuml -syntax docs/**/*.puml'</code></pre>
             </div>
             <div class="card">
-              <h3>Health check</h3>
-              <pre><code>curl http://localhost:3000/health</code></pre>
+              <h3>Bruno Route Sync</h3>
+              <pre><code>pnpm sync:bruno-routes</code></pre>
+              <p>Run only when a manifest path or Bruno route variable changes.</p>
             </div>
             <div class="card">
-              <h3>MongoDB Compass</h3>
-              <pre><code>mongodb://localhost:27017/ecommerce</code></pre>
+              <h3>Bruno CLI Smoke</h3>
+              <pre><code>cd bruno
+bru run "Health.bru" "Countries/List Countries.bru" \
+  --env-file "environments/Local.bru"</code></pre>
             </div>
+          </div>
+
+          <div class="timeline" style="margin-top: 18px;">
+            <div class="step"><div><h3>Add Or Change A Route</h3><p>Edit the feature <code>*.manifest.ts</code> first. The public route contract should be the first thing you can search for.</p></div></div>
+            <div class="step"><div><h3>Wire Express</h3><p>Use the manifest entry in <code>*.routes.ts</code> with auth middleware and validation middleware.</p></div></div>
+            <div class="step"><div><h3>Implement Behavior</h3><p>Controller calls service. Service calls repositories or another module's service. Repository talks to Mongoose.</p></div></div>
+            <div class="step"><div><h3>Add Tests</h3><p>Write or update Vitest integration tests through <code>requestRoute</code> and route manifests.</p></div></div>
+            <div class="step"><div><h3>Sync Bruno</h3><p>If paths changed, run <code>pnpm sync:bruno-routes</code>, then update request bodies/scripts if needed.</p></div></div>
+          </div>
+        </section>
+
+        <section id="guardrails">
+          <h2>Architecture Guardrails</h2>
+          <div class="grid-2">
+            <div class="callout danger">
+              <h3>Do Not</h3>
+              <ul>
+                <li>Do not let controllers call repositories directly.</li>
+                <li>Do not let controllers call other controllers.</li>
+                <li>Do not put business rules in route files.</li>
+                <li>Do not expose Mongoose documents outside repositories.</li>
+                <li>Do not query another module's repository from a service. Use that module's service.</li>
+                <li>Do not store raw refresh tokens or raw passwords.</li>
+                <li>Do not add indexes just because a field exists.</li>
+                <li>Do not hardcode API paths in tests when a manifest exists.</li>
+              </ul>
+            </div>
+            <div class="callout">
+              <h3>Do</h3>
+              <ul>
+                <li>Start route changes in <code>*.manifest.ts</code>.</li>
+                <li>Keep modules feature-local under <code>src/modules</code>.</li>
+                <li>Use Zod for request shape validation.</li>
+                <li>Use services for semantic/business validation.</li>
+                <li>Return consistent response envelopes.</li>
+                <li>Use repositories as the persistence boundary.</li>
+                <li>Test behavior through HTTP with Vitest.</li>
+                <li>Run <code>pnpm typecheck</code> and <code>pnpm test</code> before considering work done.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="diagram" style="margin-top: 18px;">
+            <div class="diagram-title">
+              <h3>Error Semantics</h3>
+              <span>Keep API failures predictable</span>
+            </div>
+            <table>
+              <thead><tr><th>Status</th><th>Use When</th><th>Example</th></tr></thead>
+              <tbody>
+                <tr><td><code>400</code></td><td>Request shape is invalid.</td><td>Invalid email, invalid ObjectId format.</td></tr>
+                <tr><td><code>401</code></td><td>Authentication is missing or invalid.</td><td>Invalid access token, invalid credentials.</td></tr>
+                <tr><td><code>404</code></td><td>Requested resource does not exist for this caller.</td><td>User cannot access another user's address.</td></tr>
+                <tr><td><code>409</code></td><td>Unique/business conflict.</td><td>Email or username already exists.</td></tr>
+                <tr><td><code>422</code></td><td>Valid request shape, invalid business meaning.</td><td>Valid countryId format but no active country exists.</td></tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
         <footer>
-          This guide intentionally keeps the architecture practical. The project should teach backend concepts step by step without turning every feature into a framework inside the framework.
+          This guide is the working map for the backend. If the architecture changes, update this file, the decision docs under <code>docs/specs</code>, the route manifests, tests, and Bruno together.
         </footer>
       </main>
     </div>
