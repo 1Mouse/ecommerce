@@ -515,6 +515,7 @@
           <a href="#bruno">Bruno</a>
           <a href="#workflow">Workflow</a>
           <a href="#guardrails">Guardrails</a>
+          <a href="#operations">Operations</a>
         </nav>
       </aside>
 
@@ -922,6 +923,30 @@ bru run "Health.bru" "Countries/List Countries.bru" \
                 <tr><td><code>422</code></td><td>Valid request shape, invalid business meaning.</td><td>Valid countryId format but no active country exists.</td></tr>
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <section id="operations">
+          <h2>Operations</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Service Logs</h3>
+              <pre><code>podman compose logs -f api
+podman compose logs --tail=100 -f api</code></pre>
+              <p>Use this when you want logs for the Compose service named <code>api</code>.</p>
+            </div>
+            <div class="card">
+              <h3>Container Logs</h3>
+              <pre><code>podman logs -f ecommerce_api_1
+podman logs --tail=100 -f ecommerce_api_1</code></pre>
+              <p>Use this when you want logs for the actual running container.</p>
+            </div>
+            <div class="card">
+              <h3>All Services</h3>
+              <pre><code>podman compose logs -f
+podman compose logs --tail=100 -f</code></pre>
+              <p>Use this to follow logs from <code>api</code>, <code>mongo</code>, and <code>mailpit</code> together.</p>
+            </div>
           </div>
         </section>
 
