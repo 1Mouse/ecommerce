@@ -1,0 +1,72 @@
+@startuml RepositoryPattern
+
+title Mongo Repository Pattern
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  ArrowColor #334155
+}
+
+abstract class MongoBaseCrudRepository<TApp, TDocument> {
+  # model
+  + create(input) : TApp
+  + findById(id) : TApp?
+  + findMany(filter, pagination) : Paginated<TApp>
+  + updateById(id, input) : TApp?
+  + softDeleteById(id) : TApp?
+  + exists(filter) : boolean
+  # toApp(document) : TApp
+  # withNotDeleted(filter) : filter
+}
+
+class UserRepository {
+  + findByEmail(email) : User?
+  + findByUsername(username) : User?
+}
+
+class UserAddressRepository {
+  + findByUserId(userId, pagination) : Paginated<UserAddress>
+  + findOwnedById(userId, addressId) : UserAddress?
+}
+
+class CountryRepository {
+  + findByIso2(iso2) : Country?
+  + findByIso3(iso3) : Country?
+  + findByName(name) : Country?
+}
+
+class RefreshTokenRepository {
+  + findByTokenHash(tokenHash) : RefreshToken?
+  + revokeByTokenHash(tokenHash) : RefreshToken?
+  + revokeAllForUser(userId) : number
+}
+
+class UsersService
+class UserAddressesService
+class CountriesService
+class AuthService
+
+UserRepository --|> MongoBaseCrudRepository
+UserAddressRepository --|> MongoBaseCrudRepository
+CountryRepository --|> MongoBaseCrudRepository
+RefreshTokenRepository --|> MongoBaseCrudRepository
+
+UsersService --> UserRepository
+UserAddressesService --> UserAddressRepository
+UserAddressesService --> CountriesService : cross-module service call
+CountriesService --> CountryRepository
+AuthService --> UserRepository
+AuthService --> RefreshTokenRepository
+
+note right of MongoBaseCrudRepository
+  Normal reads exclude deletedAt records.
+  List reads are paginated.
+  Deletes set deletedAt instead of removing documents.
+  Repositories return plain app objects.
+end note
+
+@enduml

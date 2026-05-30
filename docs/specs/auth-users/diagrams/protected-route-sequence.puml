@@ -1,0 +1,42 @@
+@startuml ProtectedRouteSequence
+
+title Protected Route Sequence
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+actor Client
+participant "AuthMiddleware" as Middleware
+participant "UsersController" as Controller
+participant "UsersService" as Service
+participant "UserRepository" as Repository
+database "MongoDB" as Mongo
+
+Client -> Middleware : GET /api/v1/users/me\nAuthorization: Bearer accessToken
+Middleware -> Middleware : verify JWT signature
+Middleware -> Middleware : verify exp and type=access
+alt invalid access token
+  Middleware --> Client : 401 error envelope
+else valid access token
+  Middleware -> Controller : request.userId = token.sub
+  Controller -> Service : getMe(userId)
+  Service -> Repository : findById(userId)
+  Repository -> Mongo : users.findOne({ _id: userId, deletedAt: null })
+  Mongo --> Repository : user or null
+  Repository --> Service : plain user object or null
+  alt user missing or deleted
+    Service --> Controller : throw 404 USER_NOT_FOUND
+    Controller --> Client : error envelope
+  else user found
+    Service --> Controller : user
+    Controller --> Client : 200 { data: user }
+  end
+end
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml RequestLifecycle
+
+title Express Request Lifecycle
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  ArrowColor #334155
+}
+
+start
+:Client sends HTTP request;
+:helmet security headers;
+:cors origin handling;
+:express.json parses JSON bodies;
+:pino-http request logging;
+
+if (Route matched?) then (yes)
+  :Route-level middleware;
+  if (Protected route?) then (yes)
+    :Auth middleware verifies access JWT;
+    if (JWT valid?) then (yes)
+      :Attach userId to request;
+    else (no)
+      :Return 401 error envelope;
+      stop
+    endif
+  endif
+  :Controller validates request with Zod;
+  if (Request shape valid?) then (yes)
+    :Controller calls service;
+    :Service applies business rules;
+    :Repository reads/writes MongoDB;
+    :Return success envelope;
+  else (no)
+    :Return 400 validation envelope;
+  endif
+else (no)
+  :notFoundHandler returns 404 envelope;
+endif
+
+stop
+
+@enduml

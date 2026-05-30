@@ -1,0 +1,99 @@
+@startuml AuthUsersModules
+
+title Auth, Users, Countries Module Boundaries
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam component {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  ArrowColor #334155
+}
+
+actor "API Client" as client
+
+package "Express App" as express {
+  component "app.ts\nGlobal middleware + route mounting" as app
+  component "container.ts\nDependency wiring" as container
+}
+
+package "auth module" as auth {
+  component "auth.routes.ts" as authRoutes
+  component "auth.controller.ts" as authController
+  component "auth.middleware.ts" as authMiddleware
+  component "auth.service.ts" as authService
+  component "refresh-token.repository.ts" as refreshTokenRepo
+  database "refreshTokens" as refreshTokens
+}
+
+package "users module" as usersModule {
+  component "users.routes.ts" as usersRoutes
+  component "users.controller.ts" as usersController
+  component "users.service.ts" as usersService
+  component "user.repository.ts" as userRepo
+  database "users" as users
+
+  component "user-addresses.controller.ts" as addressesController
+  component "user-addresses.service.ts" as addressesService
+  component "user-address.repository.ts" as addressRepo
+  database "userAddresses" as userAddresses
+}
+
+package "countries module" as countriesModule {
+  component "countries.routes.ts" as countriesRoutes
+  component "countries.controller.ts" as countriesController
+  component "countries.service.ts" as countriesService
+  component "country.repository.ts" as countryRepo
+  database "countries" as countries
+}
+
+package "infrastructure" as infra {
+  component "mongo-base-crud.repository.ts" as baseRepo
+  component "mongodb.ts" as mongoConnection
+  database "MongoDB" as mongodb
+}
+
+client --> app : HTTP
+app --> authRoutes : /api/v1/auth
+app --> usersRoutes : /api/v1/users
+app --> countriesRoutes : /api/v1/countries
+
+authRoutes --> authController
+authRoutes --> authMiddleware
+authController --> authService
+authService --> userRepo : signup/login user lookup
+authService --> refreshTokenRepo
+refreshTokenRepo --> refreshTokens
+
+usersRoutes --> usersController
+usersRoutes --> addressesController
+usersRoutes --> authMiddleware : protected routes
+usersController --> usersService
+usersService --> userRepo
+userRepo --> users
+
+addressesController --> addressesService
+addressesService --> addressRepo
+addressesService --> countriesService : verify countryId
+addressRepo --> userAddresses
+
+countriesRoutes --> countriesController
+countriesController --> countriesService
+countriesService --> countryRepo
+countryRepo --> countries
+
+userRepo -up-|> baseRepo
+addressRepo -up-|> baseRepo
+countryRepo -up-|> baseRepo
+refreshTokenRepo -up-|> baseRepo
+baseRepo --> mongoConnection
+mongoConnection --> mongodb
+
+container ..> authController : creates
+container ..> usersController : creates
+container ..> addressesController : creates
+container ..> countriesController : creates
+
+@enduml

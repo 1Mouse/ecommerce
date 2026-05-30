@@ -1,0 +1,53 @@
+@startuml AuthRefreshSequence
+
+title Refresh Token Rotation Sequence
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+actor Client
+participant "AuthController" as Controller
+participant "AuthService" as Service
+participant "RefreshTokenRepository" as Tokens
+participant "UserRepository" as Users
+database "MongoDB" as Mongo
+
+Client -> Controller : POST /api/v1/auth/refresh\nrefreshToken
+Controller -> Controller : Zod strip + validate body
+Controller -> Service : refresh(refreshToken)
+Service -> Service : tokenHash = SHA-256(refreshToken)
+Service -> Tokens : findByTokenHash(tokenHash)
+Tokens -> Mongo : refreshTokens.findOne({ tokenHash, deletedAt: null })
+Mongo --> Tokens : token row or null
+Tokens --> Service : token row or null
+
+alt token missing, expired, revoked, or deleted
+  Service --> Controller : throw 401 INVALID_REFRESH_TOKEN
+  Controller --> Client : error envelope
+else token active
+  Service -> Users : findById(userId)
+  Users -> Mongo : users.findOne({ _id: userId, deletedAt: null })
+  Mongo --> Users : user or null
+  alt user missing or deleted
+    Service --> Controller : throw 401 INVALID_REFRESH_TOKEN
+    Controller --> Client : error envelope
+  else user active
+    Service -> Service : create new opaque refresh token\nhash new token\ncreate new access JWT
+    Service -> Tokens : create new refresh token row
+    Tokens -> Mongo : refreshTokens.insertOne(...)
+    Mongo --> Tokens : new token row
+    Service -> Tokens : revoke old token\nset revokedAt and replacedByTokenId
+    Tokens -> Mongo : refreshTokens.updateOne(...)
+    Mongo --> Tokens : updated old token row
+    Service --> Controller : accessToken + refreshToken + user
+    Controller --> Client : 200 { data }
+  end
+end
+
+@enduml

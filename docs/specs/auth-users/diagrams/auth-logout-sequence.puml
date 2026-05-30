@@ -1,0 +1,53 @@
+@startuml AuthLogoutSequence
+
+title Logout And Logout-All Sequence
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+actor Client
+participant "AuthMiddleware" as Middleware
+participant "AuthController" as Controller
+participant "AuthService" as Service
+participant "RefreshTokenRepository" as Tokens
+database "MongoDB" as Mongo
+
+== Logout current device ==
+
+Client -> Controller : POST /api/v1/auth/logout\nrefreshToken
+Controller -> Controller : Zod strip + validate body
+Controller -> Service : logout(refreshToken)
+Service -> Service : tokenHash = SHA-256(refreshToken)
+Service -> Tokens : revokeByTokenHash(tokenHash)
+Tokens -> Mongo : refreshTokens.updateOne({ tokenHash }, { revokedAt: now })
+Mongo --> Tokens : updated token row or null
+Tokens --> Service : revoked token or null
+Service --> Controller : logout result
+Controller --> Client : 200 { data }
+
+== Logout all devices ==
+
+Client -> Middleware : POST /api/v1/auth/logout-all\nAuthorization: Bearer accessToken
+Middleware -> Middleware : verify access JWT signature, exp, type
+Middleware -> Controller : request.userId
+Controller -> Service : logoutAll(userId)
+Service -> Tokens : revokeAllForUser(userId)
+Tokens -> Mongo : refreshTokens.updateMany({ userId, revokedAt: null, deletedAt: null }, { revokedAt: now })
+Mongo --> Tokens : modified count
+Tokens --> Service : revoked count
+Service --> Controller : revoked count
+Controller --> Client : 200 { data }
+
+note over Client, Service
+  Access tokens are stateless.
+  Logout revokes refresh tokens.
+  Existing access tokens may work until their 15-minute expiry.
+end note
+
+@enduml

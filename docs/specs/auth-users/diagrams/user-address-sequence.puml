@@ -1,0 +1,47 @@
+@startuml UserAddressSequence
+
+title Create User Address Sequence
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+actor Client
+participant "AuthMiddleware" as Middleware
+participant "UserAddressesController" as Controller
+participant "UserAddressesService" as AddressService
+participant "CountriesService" as CountriesService
+participant "UserAddressRepository" as AddressRepo
+database "MongoDB" as Mongo
+
+Client -> Middleware : POST /api/v1/users/me/addresses\nAuthorization: Bearer accessToken
+Middleware -> Middleware : verify stateless access JWT
+Middleware -> Controller : request.userId
+Controller -> Controller : Zod strip + validate body
+alt invalid request shape
+  Controller --> Client : 400 VALIDATION_ERROR
+else valid request shape
+  Controller -> AddressService : create(userId, input)
+  AddressService -> CountriesService : ensureActiveCountry(countryId)
+  CountriesService -> Mongo : countries.findOne({ _id: countryId, deletedAt: null })
+  Mongo --> CountriesService : country or null
+  alt valid ObjectId but country missing/deleted
+    CountriesService --> AddressService : throw 422 INVALID_COUNTRY_ID
+    AddressService --> Controller : error
+    Controller --> Client : error envelope
+  else country active
+    AddressService -> AddressRepo : create({ userId, countryId, ... })
+    AddressRepo -> Mongo : userAddresses.insertOne(...)
+    Mongo --> AddressRepo : created address
+    AddressRepo --> AddressService : plain address object
+    AddressService --> Controller : address
+    Controller --> Client : 201 { data: address }
+  end
+end
+
+@enduml
