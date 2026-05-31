@@ -13,6 +13,6 @@ a scheduler service
 a cronjob
 this also will be multi tenent in the future and we might put a db adapter to practice postgres here too
 
-rbac
+rbac (casl)
 event driven
 rabbitmq
