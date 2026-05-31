@@ -23,6 +23,21 @@ app.use(express.json({ limit: "1mb" }));
 app.use(
   pinoHttp({
     enabled: env.nodeEnv !== "test",
+    transport:
+      env.nodeEnv === "development"
+        ? {
+            target: "pino-pretty",
+            options: {
+              colorize: true,
+              translateTime: "SYS:standard",
+              hideObject: true,
+              crlf: true,
+              ignore: "pid,hostname",
+              messageFormat:
+                "{req.method} {req.url} -> {res.statusCode} ({responseTime}ms)",
+            },
+          }
+        : undefined,
   }),
 );
 

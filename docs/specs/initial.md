@@ -16,3 +16,5 @@ this also will be multi tenent in the future and we might put a db adapter to pr
 rbac (casl)
 event driven
 rabbitmq
+
+localstack to mimic s3 and upload user image
