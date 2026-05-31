@@ -12,3 +12,7 @@ ai chatbot to practice streaming
 a scheduler service
 a cronjob
 this also will be multi tenent in the future and we might put a db adapter to practice postgres here too
+
+rbac
+event driven
+rabbitmq
