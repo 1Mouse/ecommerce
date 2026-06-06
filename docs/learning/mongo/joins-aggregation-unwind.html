@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Joins, MongoDB Aggregation, and $unwind</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #111a33;
+      --panel-2: #172449;
+      --text: #ecf2ff;
+      --muted: #a9b8d7;
+      --line: #2d3d6a;
+      --accent: #7dd3fc;
+      --accent-2: #a7f3d0;
+      --warn: #fbbf24;
+      --bad: #fca5a5;
+      --good: #86efac;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.18), transparent 28rem),
+        radial-gradient(circle at top right, rgba(167, 243, 208, 0.12), transparent 24rem),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 64px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(23, 36, 73, 0.95), rgba(17, 26, 51, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    }
+
+    h1, h2, h3 { line-height: 1.15; margin: 0 0 14px; }
+    h1 { font-size: clamp(2.2rem, 6vw, 4.8rem); letter-spacing: -0.06em; }
+    h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); letter-spacing: -0.03em; margin-top: 18px; }
+    h3 { font-size: 1.1rem; color: var(--accent-2); }
+    p { margin: 0 0 14px; color: var(--muted); }
+    strong { color: var(--text); }
+
+    .tagline {
+      max-width: 760px;
+      font-size: 1.15rem;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(125, 211, 252, 0.08);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin: 18px 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .mini {
+      background: rgba(11, 16, 32, 0.52);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .mini p:last-child { margin-bottom: 0; }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    code {
+      color: var(--accent-2);
+      background: rgba(167, 243, 208, 0.08);
+      border: 1px solid rgba(167, 243, 208, 0.15);
+      padding: 0.1rem 0.3rem;
+      border-radius: 0.35rem;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #070b16;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      overflow-x: auto;
+      color: #d9e7ff;
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      margin: 18px 0;
+      background: rgba(11, 16, 32, 0.48);
+    }
+
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+    }
+
+    th { color: var(--accent); background: rgba(125, 211, 252, 0.08); }
+    tr:last-child td { border-bottom: 0; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .stage {
+      background: rgba(125, 211, 252, 0.08);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      min-height: 104px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stage b { color: var(--accent-2); display: block; }
+    .stage span { color: var(--muted); font-size: 0.86rem; }
+
+    .callout {
+      border-left: 4px solid var(--warn);
+      background: rgba(251, 191, 36, 0.08);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 18px 0;
+    }
+
+    .callout p { margin-bottom: 0; }
+
+    button {
+      border: 1px solid var(--line);
+      background: rgba(125, 211, 252, 0.12);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:hover { border-color: var(--accent); }
+
+    .quiz-option {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      text-align: left;
+      border-radius: 14px;
+    }
+
+    .feedback {
+      min-height: 28px;
+      margin-top: 10px;
+      font-weight: 800;
+    }
+
+    .good { color: var(--good); }
+    .bad { color: var(--bad); }
+
+    footer {
+      color: var(--muted);
+      margin-top: 24px;
+      font-size: 0.9rem;
+    }
+
+    a { color: var(--accent); }
+
+    @media (max-width: 800px) {
+      main { width: min(100% - 20px, 1120px); padding-top: 24px; }
+      .hero, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .card { padding: 18px; border-radius: 18px; }
+      table { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="card">
+        <h1>Joins, Pipelines, and $unwind</h1>
+        <p class="tagline">This lesson compares the relational Postgres way of combining rows with the MongoDB document way of reshaping documents. The ecommerce goal is practical: know when to reference, when to embed, and how to query across collections without confusing MongoDB with SQL.</p>
+        <div class="pill-row">
+          <span class="pill">Postgres joins</span>
+          <span class="pill">MongoDB aggregation</span>
+          <span class="pill">$lookup</span>
+          <span class="pill">$unwind</span>
+          <span class="pill">Ecommerce persistence</span>
+        </div>
+      </div>
+      <aside class="card">
+        <h2>Mental Model</h2>
+        <p><strong>Postgres:</strong> keep related facts in tables, combine rows at query time with joins.</p>
+        <p><strong>MongoDB:</strong> keep data you read together in documents, use aggregation stages to filter, join, flatten, group, and reshape documents.</p>
+      </aside>
+    </section>
+
+    <section class="card">
+      <h2>1. What A Join Does</h2>
+      <p>A join combines records from two sources using a rule. In ecommerce, that rule might be: <code>orders.user_id = users.id</code> or <code>orders.userId = users._id</code>.</p>
+      <div class="grid-3">
+        <div class="mini">
+          <h3>Inner Join</h3>
+          <p>Only rows with a match on both sides survive.</p>
+        </div>
+        <div class="mini">
+          <h3>Left Outer Join</h3>
+          <p>Every left-side row survives. Missing right-side data becomes <code>null</code>.</p>
+        </div>
+        <div class="mini">
+          <h3>Right Outer Join</h3>
+          <p>The mirror of a left join. Every right-side row survives.</p>
+        </div>
+        <div class="mini">
+          <h3>Full Outer Join</h3>
+          <p>All rows from both sides survive. Non-matches get <code>null</code> on the missing side.</p>
+        </div>
+        <div class="mini">
+          <h3>Cross Join</h3>
+          <p>Every row from one side pairs with every row from the other. Use carefully.</p>
+        </div>
+        <div class="mini">
+          <h3>Self Join</h3>
+          <p>A table joins to itself, usually with aliases. Useful for comparing records in the same table.</p>
+        </div>
+      </div>
+      <div class="callout">
+        <p>Postgres documentation introduces joins as queries that combine rows from tables, with a join condition saying which rows should be paired.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. The MongoDB Aggregation Pipeline</h2>
+      <p>An aggregation pipeline is an ordered list of stages. Each stage receives documents, transforms or filters them, then passes the result to the next stage.</p>
+      <div class="flow" aria-label="Aggregation pipeline stages">
+        <div class="stage"><b>$match</b><span>filter documents</span></div>
+        <div class="stage"><b>$lookup</b><span>attach matching documents from another collection</span></div>
+        <div class="stage"><b>$unwind</b><span>turn array elements into separate documents</span></div>
+        <div class="stage"><b>$group</b><span>aggregate by a key</span></div>
+        <div class="stage"><b>$project</b><span>shape the output</span></div>
+      </div>
+      <p>The key difference from a normal SQL join is shape. SQL usually returns a flat table-shaped result. MongoDB returns documents, so a stage can add nested objects or arrays.</p>
+      <table>
+        <thead>
+          <tr><th>SQL idea</th><th>MongoDB pipeline stage</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>WHERE</code></td><td><code>$match</code></td><td>Keep only matching documents.</td></tr>
+          <tr><td><code>JOIN</code></td><td><code>$lookup</code></td><td>Add related documents from another collection.</td></tr>
+          <tr><td><code>GROUP BY</code></td><td><code>$group</code></td><td>Combine documents by a key and calculate totals, counts, averages, etc.</td></tr>
+          <tr><td><code>ORDER BY</code></td><td><code>$sort</code></td><td>Sort the current documents.</td></tr>
+          <tr><td><code>SELECT columns</code></td><td><code>$project</code></td><td>Choose or compute output fields.</td></tr>
+          <tr><td><code>UNNEST</code> style flattening</td><td><code>$unwind</code></td><td>Expand an array into one document per array element.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>3. $lookup Is MongoDB's Join Stage</h2>
+      <p><code>$lookup</code> performs a left outer join to another collection in the same database. It adds a new array field containing matched documents.</p>
+      <pre>{
+  $lookup: {
+    from: "users",
+    localField: "userId",
+    foreignField: "_id",
+    as: "user"
+  }
+}</pre>
+      <p>If an order matches one user, the result still looks like <code>user: [ { ... } ]</code>. If it matches no user, it looks like <code>user: []</code>. This is why <code>$lookup</code> often appears right before <code>$unwind</code>.</p>
+      <div class="callout">
+        <p>Important design point: MongoDB docs warn that excessive <code>$lookup</code> use can hurt performance. If data is usually read together, consider embedding it instead of joining it repeatedly.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4. $unwind Flattens Arrays</h2>
+      <p><code>$unwind</code> deconstructs an array field. One input document can become many output documents, one per array element.</p>
+      <div class="grid-2">
+        <div class="mini">
+          <h3>Before</h3>
+          <pre>{
+  _id: "order_1",
+  items: ["keyboard", "mouse", "monitor"]
+}</pre>
+        </div>
+        <div class="mini">
+          <h3>After <code>$unwind: "$items"</code></h3>
+          <pre>{ _id: "order_1", items: "keyboard" }
+{ _id: "order_1", items: "mouse" }
+{ _id: "order_1", items: "monitor" }</pre>
+        </div>
+      </div>
+      <p>By default, if the field is missing, <code>null</code>, or an empty array, MongoDB drops that document from the output. Use <code>preserveNullAndEmptyArrays: true</code> when you want to keep it.</p>
+      <pre>{
+  $unwind: {
+    path: "$items",
+    preserveNullAndEmptyArrays: true,
+    includeArrayIndex: "itemIndex"
+  }
+}</pre>
+    </section>
+
+    <section class="card">
+      <h2>5. Ecommerce Rule Of Thumb</h2>
+      <table>
+        <thead>
+          <tr><th>Question</th><th>Postgres instinct</th><th>MongoDB instinct</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Show an order with its line items</td><td>Join <code>orders</code> to <code>order_items</code>.</td><td>Embed line items in the order document because they are read together.</td></tr>
+          <tr><td>Show an order with the user's email</td><td>Join <code>orders</code> to <code>users</code>.</td><td>Use <code>$lookup</code> if you need current user data, or store a snapshot if historical accuracy matters.</td></tr>
+          <tr><td>Report revenue by product category</td><td>Join, group, aggregate.</td><td><code>$unwind</code> order items, optionally <code>$lookup</code> products, then <code>$group</code>.</td></tr>
+        </tbody>
+      </table>
+      <p>For orders, embedding purchased item name, SKU, unit price, and quantity is often correct because an order is a historical record. You usually do not want old order totals to change just because the product's current price changed.</p>
+    </section>
+
+    <section class="card">
+      <h2>Check Yourself</h2>
+      <p>You have an <code>orders</code> collection. Each order has <code>items: [{ productId, quantity, unitPrice }]</code>. You want total quantity sold per product. Which stage probably comes first after filtering paid orders?</p>
+      <button class="quiz-option" data-correct="false">A. <code>$lookup</code>, because product details are always required first.</button>
+      <button class="quiz-option" data-correct="true">B. <code>$unwind</code>, because each item needs to become its own document before grouping by product.</button>
+      <button class="quiz-option" data-correct="false">C. <code>$project</code>, because MongoDB cannot group arrays.</button>
+      <p id="feedback" class="feedback" aria-live="polite"></p>
+    </section>
+
+    <footer>
+      <p>Sources: MongoDB Manual pages for Aggregation Operations, <code>$lookup</code>, and <code>$unwind</code>; PostgreSQL Manual page for Joins Between Tables.</p>
+    </footer>
+  </main>
+
+  <script>
+    const feedback = document.querySelector('#feedback');
+    document.querySelectorAll('.quiz-option').forEach((button) => {
+      button.addEventListener('click', () => {
+        const correct = button.dataset.correct === 'true';
+        feedback.className = correct ? 'feedback good' : 'feedback bad';
+        feedback.textContent = correct
+          ? 'Correct. Once items are separate documents, $group can count or sum by productId.'
+          : 'Not quite. Think about the shape first: grouping by product needs one document per line item.';
+      });
+    });
+  </script>
+</body>
+</html>

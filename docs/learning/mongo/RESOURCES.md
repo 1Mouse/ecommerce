@@ -8,8 +8,16 @@
   Use for: how databases contain collections, how collections contain documents, automatic collection creation, and MongoDB's flexible schema behavior.
 - [MongoDB Manual: Data Modeling](https://www.mongodb.com/docs/manual/data-modeling/)
   Use for: deciding whether data should be embedded or referenced based on ecommerce access patterns.
+- [MongoDB Manual: Aggregation Operations](https://www.mongodb.com/docs/manual/aggregation/)
+  Use for: understanding how aggregation pipelines process documents through ordered stages such as filtering, grouping, sorting, and reshaping.
+- [MongoDB Manual: `$lookup`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/)
+  Use for: comparing MongoDB's left outer join stage with SQL joins and understanding why matched documents are returned as an array field.
+- [MongoDB Manual: `$unwind`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/)
+  Use for: understanding how arrays are deconstructed into one output document per element and how null, missing, and empty arrays behave.
 - [MongoDB Manual: Schema Validation](https://www.mongodb.com/docs/manual/core/schema-validation/)
   Use for: understanding optional database-level validation and when to enforce rules in MongoDB itself.
+- [PostgreSQL Manual: Joins Between Tables](https://www.postgresql.org/docs/current/tutorial-join.html)
+  Use for: grounding SQL join terminology, especially inner joins, left outer joins, right outer joins, full outer joins, and self joins.
 - [Mongoose Docs: Schemas](https://mongoosejs.com/docs/guide.html)
   Use for: how Mongoose schemas map to collections, define document shape, apply strict mode, timestamps, indexes, and options.
 - [Mongoose Docs: Models](https://mongoosejs.com/docs/models.html)
