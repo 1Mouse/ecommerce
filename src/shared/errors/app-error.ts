@@ -32,6 +32,16 @@ export class ValidationError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message = "Bad request", code = "BAD_REQUEST", details?: unknown) {
+    super(message, {
+      statusCode: 400,
+      code,
+      details,
+    });
+  }
+}
+
 export class UnauthorizedError extends AppError {
   constructor(message = "Unauthorized", code = "UNAUTHORIZED") {
     super(message, {

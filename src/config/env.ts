@@ -32,6 +32,12 @@ const envSchema = z.object({
   SMTP_HOST: z.string().min(1).default("localhost"),
   SMTP_PORT: z.coerce.number().int().min(1).max(65_535).default(1025),
   SMTP_FROM: z.string().min(1).default("Ecommerce <no-reply@ecommerce.local>"),
+  S3_ENDPOINT: z.string().url().default("http://localhost:9000"),
+  S3_REGION: z.string().min(1).default("us-east-1"),
+  S3_BUCKET: z.string().min(3).default("ecommerce-local"),
+  S3_ACCESS_KEY_ID: z.string().min(1).default("minioadmin"),
+  S3_SECRET_ACCESS_KEY: z.string().min(1).default("minioadmin"),
+  S3_FORCE_PATH_STYLE: z.coerce.boolean().default(true),
   PASSWORD_HASH_ROUNDS: z.coerce.number().int().min(10).max(14).default(12),
   CORS_ORIGINS: z
     .string()
@@ -74,6 +80,12 @@ export const env = {
   smtpHost: rawEnv.SMTP_HOST,
   smtpPort: rawEnv.SMTP_PORT,
   smtpFrom: rawEnv.SMTP_FROM,
+  s3Endpoint: rawEnv.S3_ENDPOINT,
+  s3Region: rawEnv.S3_REGION,
+  s3Bucket: rawEnv.S3_BUCKET,
+  s3AccessKeyId: rawEnv.S3_ACCESS_KEY_ID,
+  s3SecretAccessKey: rawEnv.S3_SECRET_ACCESS_KEY,
+  s3ForcePathStyle: rawEnv.S3_FORCE_PATH_STYLE,
   passwordHashRounds: rawEnv.PASSWORD_HASH_ROUNDS,
   corsOrigins,
 } as const;

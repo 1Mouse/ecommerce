@@ -1,4 +1,5 @@
 import { SmtpEmailService } from "./infrastructure/email/smtp-email.service.ts";
+import { S3ObjectStorageService } from "./infrastructure/storage/s3-object-storage.service.ts";
 import { AuthController } from "./modules/auth/auth.controller.ts";
 import { EmailVerificationService } from "./modules/auth/email-verification.service.ts";
 import { EmailVerificationTokenRepository } from "./modules/auth/email-verification-token.repository.ts";
@@ -25,9 +26,10 @@ const emailVerificationTokenRepository = new EmailVerificationTokenRepository();
 const passwordService = new PasswordService();
 const tokenService = new TokenService();
 const emailService = new SmtpEmailService();
+const objectStorageService = new S3ObjectStorageService();
 
 const countriesService = new CountriesService(countryRepository);
-const usersService = new UsersService(userRepository);
+const usersService = new UsersService(userRepository, objectStorageService);
 const userAddressesService = new UserAddressesService(
   userAddressRepository,
   countriesService,

@@ -17,4 +17,4 @@ rbac (casl)
 event driven
 rabbitmq
 
-localstack to mimic s3 and upload user image
+MinIO to mimic S3 and upload user image

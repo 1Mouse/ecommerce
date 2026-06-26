@@ -30,6 +30,30 @@ export class UsersController {
     sendSuccess(response, user);
   }
 
+  async uploadMyImage(request: Request, response: Response): Promise<void> {
+    const user = await this.usersService.uploadMyImage(
+      this.getUserId(request),
+      request.file ? { buffer: request.file.buffer } : null,
+    );
+
+    sendSuccess(response, user);
+  }
+
+  async getMyImage(request: Request, response: Response): Promise<void> {
+    const image = await this.usersService.getMyImage(this.getUserId(request));
+
+    response
+      .status(200)
+      .type(image.contentType)
+      .send(Buffer.from(image.body));
+  }
+
+  async deleteMyImage(request: Request, response: Response): Promise<void> {
+    const user = await this.usersService.deleteMyImage(this.getUserId(request));
+
+    sendSuccess(response, user);
+  }
+
   async deleteMe(request: Request, response: Response): Promise<void> {
     const result = await this.usersService.deleteMe(this.getUserId(request));
     sendSuccess(response, result);

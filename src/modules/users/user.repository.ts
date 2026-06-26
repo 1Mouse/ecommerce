@@ -84,6 +84,12 @@ export class UserRepository extends MongoBaseCrudRepository<UserDocument, User> 
       emailVerifiedAt: verifiedAt,
     });
   }
+
+  async setImageExt(userId: string, imageExt: string | null): Promise<User | null> {
+    return this.updateById(userId, {
+      imageExt,
+    });
+  }
 }
 
 export function toPublicUser(user: User): PublicUser {

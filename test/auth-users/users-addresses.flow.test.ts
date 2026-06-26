@@ -21,6 +21,7 @@ type UserResponse = {
     id: string;
     email: string;
     username: string;
+    imageExt: string | null;
     phone: string | null;
     dob: string | null;
   };
@@ -177,6 +178,68 @@ describe("users and addresses API", () => {
     expect(deleteResponse.body.data.deletedAt).toEqual(expect.any(String));
     expect(getAfterDelete.status).toBe(404);
     expect(getAfterDelete.body.error.code).toBe("USER_NOT_FOUND");
+  });
+
+  it("lets an authenticated user upload, read, and delete their profile image", async () => {
+    const user = uniqueUser("image");
+    const signupResponse = await signup(server.baseUrl, user);
+    const accessToken = signupResponse.body.data.accessToken;
+    const image = getTinyPng();
+
+    const uploadResponse = await requestMultipartImage<UserResponse>(
+      server.baseUrl,
+      usersManifest.uploadMyImage.path,
+      accessToken,
+      image,
+      "profile.png",
+    );
+    const getUserAfterUpload = await requestRoute<UserResponse>(
+      server.baseUrl,
+      usersManifest.getMe,
+      { accessToken },
+    );
+    const imageResponse = await requestBinary(
+      server.baseUrl,
+      usersManifest.getMyImage.path,
+      accessToken,
+    );
+    const deleteResponse = await requestRoute<UserResponse>(
+      server.baseUrl,
+      usersManifest.deleteMyImage,
+      { accessToken },
+    );
+    const imageAfterDelete = await requestRoute<ErrorResponse>(
+      server.baseUrl,
+      usersManifest.getMyImage,
+      { accessToken },
+    );
+
+    expect(uploadResponse.status).toBe(200);
+    expect(uploadResponse.body.data.imageExt).toBe("png");
+    expect(getUserAfterUpload.body.data.imageExt).toBe("png");
+    expect(imageResponse.status).toBe(200);
+    expect(imageResponse.contentType).toContain("image/png");
+    expect(Buffer.compare(imageResponse.body, image)).toBe(0);
+    expect(deleteResponse.body.data.imageExt).toBeNull();
+    expect(imageAfterDelete.status).toBe(404);
+    expect(imageAfterDelete.body.error.code).toBe("USER_IMAGE_NOT_FOUND");
+  });
+
+  it("rejects invalid profile image uploads", async () => {
+    const user = uniqueUser("invalid_image");
+    const signupResponse = await signup(server.baseUrl, user);
+    const accessToken = signupResponse.body.data.accessToken;
+
+    const response = await requestMultipartImage<ErrorResponse>(
+      server.baseUrl,
+      usersManifest.uploadMyImage.path,
+      accessToken,
+      Buffer.from("not an image"),
+      "profile.txt",
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe("INVALID_IMAGE_FILE");
   });
 
   it("lets an authenticated user create, read, list, update, and soft delete their address", async () => {
@@ -379,3 +442,64 @@ type ApiResponse<T> = {
   status: number;
   body: T;
 };
+
+function getTinyPng(): Buffer {
+  return Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    "base64",
+  );
+}
+
+async function requestMultipartImage<T>(
+  baseUrl: string,
+  path: string,
+  accessToken: string,
+  file: Buffer,
+  filename: string,
+): Promise<ApiResponse<T>> {
+  const form = new FormData();
+  form.append(
+    "image",
+    new Blob([new Uint8Array(file)], {
+      type: filename.endsWith(".png") ? "image/png" : "text/plain",
+    }),
+    filename,
+  );
+
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "PUT",
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+    body: form,
+  });
+  const body = (await response.json()) as T;
+
+  return {
+    status: response.status,
+    body,
+  };
+}
+
+async function requestBinary(
+  baseUrl: string,
+  path: string,
+  accessToken: string,
+): Promise<{
+  status: number;
+  body: Buffer;
+  contentType: string;
+}> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "GET",
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  return {
+    status: response.status,
+    body: Buffer.from(await response.arrayBuffer()),
+    contentType: response.headers.get("content-type") ?? "",
+  };
+}

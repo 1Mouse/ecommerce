@@ -1,6 +1,9 @@
 import { Router } from "express";
+import multer from "multer";
+import type { RequestHandler } from "express";
 
 import { asyncHandler } from "../../shared/http/async-handler.ts";
+import { BadRequestError } from "../../shared/errors/app-error.ts";
 import { validateBody, validateParams, validateQuery } from "../../shared/http/validation.ts";
 import type { AuthMiddleware } from "../auth/auth.middleware.ts";
 import type { UserAddressesController } from "./user-addresses.controller.ts";
@@ -16,6 +19,7 @@ export type CreateUsersRouterInput = {
 export function createUsersRouter(input: CreateUsersRouterInput): Router {
   const router = Router();
   const requireAuth = input.authMiddleware.requireAuth;
+  const uploadImage = createImageUploadMiddleware();
 
   router.get(
     usersManifest.getMe.path,
@@ -28,6 +32,31 @@ export function createUsersRouter(input: CreateUsersRouterInput): Router {
     requireAuth,
     validateBody(usersManifest.updateMe.bodySchema),
     asyncHandler((request, response) => input.usersController.updateMe(request, response)),
+  );
+
+  router.put(
+    usersManifest.uploadMyImage.path,
+    requireAuth,
+    uploadImage,
+    asyncHandler((request, response) =>
+      input.usersController.uploadMyImage(request, response),
+    ),
+  );
+
+  router.get(
+    usersManifest.getMyImage.path,
+    requireAuth,
+    asyncHandler((request, response) =>
+      input.usersController.getMyImage(request, response),
+    ),
+  );
+
+  router.delete(
+    usersManifest.deleteMyImage.path,
+    requireAuth,
+    asyncHandler((request, response) =>
+      input.usersController.deleteMyImage(request, response),
+    ),
   );
 
   router.delete(
@@ -83,4 +112,30 @@ export function createUsersRouter(input: CreateUsersRouterInput): Router {
   );
 
   return router;
+}
+
+function createImageUploadMiddleware(): RequestHandler {
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 2 * 1024 * 1024,
+      files: 1,
+    },
+  }).single("image");
+
+  return (request, response, next) => {
+    upload(request, response, (error) => {
+      if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+        next(new BadRequestError("Image file is too large", "IMAGE_FILE_TOO_LARGE"));
+        return;
+      }
+
+      if (error) {
+        next(new BadRequestError("Invalid image upload", "INVALID_IMAGE_UPLOAD"));
+        return;
+      }
+
+      next();
+    });
+  };
 }
